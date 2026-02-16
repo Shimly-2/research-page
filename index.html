@@ -17,42 +17,39 @@
         
         .header {
             text-align: center;
-            padding: 40px 20px;
+            padding: 35px 20px;
             background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
             border-radius: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
-        .header h1 { color: #fff; font-size: 2.2em; margin-bottom: 8px; }
+        .header h1 { color: #fff; font-size: 2em; margin-bottom: 8px; }
         .header p { color: #b0b0c0; }
         
         .nav-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 18px;
             margin-bottom: 30px;
         }
         .nav-card {
             background: rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 25px;
+            border-radius: 14px;
+            padding: 22px;
             text-align: center;
             border: 1px solid rgba(255,255,255,0.15);
             transition: all 0.3s;
             text-decoration: none;
             display: block;
         }
-        .nav-card:hover {
-            transform: translateY(-3px);
-            background: rgba(255,255,255,0.15);
-        }
-        .nav-card h2 { color: #fff; font-size: 1.3em; margin-bottom: 8px; }
-        .nav-card p { color: #a0a8c0; font-size: 0.9em; }
+        .nav-card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.15); }
+        .nav-card h2 { color: #fff; font-size: 1.2em; margin-bottom: 6px; }
+        .nav-card p { color: #a0a8c0; font-size: 0.85em; }
         
         .filters {
             background: rgba(255,255,255,0.08);
-            padding: 15px;
+            padding: 14px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
@@ -66,41 +63,34 @@
             font-size: 14px;
         }
         
-        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
         .card {
             background: rgba(255,255,255,0.08);
             border-radius: 12px;
-            padding: 16px;
+            padding: 15px;
             border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
         }
         .card:hover { background: rgba(255,255,255,0.12); }
         .card-id {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            width: 26px; height: 26px;
+            width: 24px; height: 24px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             margin-right: 8px;
         }
-        .card h3 { color: #fff; font-size: 0.95em; line-height: 1.4; margin-bottom: 10px; }
-        .card .meta { font-size: 0.8em; color: #a0a0b0; margin-bottom: 8px; }
-        .card .meta span { margin-right: 12px; }
-        .card .tag {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            margin-right: 8px;
-        }
-        .tag-sim { background: rgba(34,197,94,0.3); color: #86efac; }
+        .card h3 { color: #fff; font-size: 0.9em; line-height: 1.4; margin-bottom: 8px; }
+        .card .meta { font-size: 0.75em; color: #a0a0b0; margin-bottom: 8px; }
+        .card .meta span { margin-right: 10px; }
         
         .card a {
             display: block;
             text-align: center;
-            padding: 10px;
+            padding: 9px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             text-decoration: none;
@@ -109,8 +99,9 @@
             font-size: 13px;
             margin-top: 10px;
         }
+        .card a:hover { opacity: 0.9; }
         
-        .stats { text-align: center; color: #888; margin-top: 20px; padding: 15px; }
+        .stats { text-align: center; color: #888; margin-top: 18px; padding: 12px; }
         @media (max-width: 600px) {
             .cards { grid-template-columns: 1fr; }
             .filters { flex-direction: column; }
@@ -136,7 +127,7 @@
         </div>
         
         <div class="filters">
-            <input type="text" id="searchInput" placeholder="搜索标题..." oninput="filterPapers()" style="flex:2;min-width:180px;">
+            <input type="text" id="searchInput" placeholder="搜索标题..." oninput="filterPapers()" style="flex:2;min-width:170px;">
             <select id="yearFilter" onchange="filterPapers()">
                 <option value="all">全部年份</option>
                 <option value="2026">2026</option>
@@ -180,10 +171,7 @@
                     return '<div class="card">' +
                         '<span class="card-id">' + p.id + '</span>' +
                         '<h3>' + p.title + '</h3>' +
-                        '<div class="meta">' +
-                            '<span>📅 ' + p.year + '</span>' +
-                            '<span>📊 ' + p.similarity + '%</span>' +
-                        '</div>' +
+                        '<div class="meta"><span>📅 ' + p.year + '</span><span>📊 ' + p.similarity + '%</span></div>' +
                         '<a href="deep_reading.html#paper-' + p.id + '">查看精读报告</a>' +
                     '</div>';
                 }).join('');
