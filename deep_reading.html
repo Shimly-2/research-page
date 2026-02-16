@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>论文精读报告</title>
+    <title>精读报告</title>
     <style>
-        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #e0e0e0;
             padding: 20px;
             line-height: 1.8;
         }
+        .back-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.2); }
         .paper {
             background: rgba(255,255,255,0.08);
             border-radius: 16px;
@@ -21,28 +30,25 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
         h1 { color: #fff; border-bottom: 2px solid #667eea; padding-bottom: 15px; }
-        h2 { color: #a0a8ff; margin-top: 35px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
-        h3 { color: #c0c8ff; }
-        h4 { color: #d0d8ff; }
+        h2 { color: #a0a8ff; margin-top: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        h3, h4 { color: #c0c8ff; }
         strong { color: #fff; }
-        code { background: rgba(102,126,234,0.2); padding: 3px 8px; border-radius: 4px; color: #a0b8ff; }
-        pre { background: #0a0a1a; padding: 20px; border-radius: 10px; overflow-x: auto; border: 1px solid #333; }
+        code { background: rgba(102,126,234,0.2); padding: 2px 6px; border-radius: 4px; color: #a0b8ff; }
+        pre { background: #0a0a1a; padding: 15px; border-radius: 8px; overflow-x: auto; }
         pre code { background: none; color: #d0d0d0; }
-        a { color: #667eea; }
-        ul { padding-left: 25px; }
-        li { margin: 8px 0; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; background: rgba(0,0,0,0.2); }
-        th, td { border: 1px solid #444; padding: 12px; text-align: left; }
-        th { background: rgba(102,126,234,0.2); color: #fff; }
-        
-        @media (max-width: 768px) {
-            body { padding: 15px; }
-            .paper { padding: 20px; }
-            table { font-size: 14px; }
+        ul { padding-left: 20px; }
+        li { margin: 6px 0; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #444; padding: 10px; text-align: left; }
+        th { background: rgba(102,126,234,0.2); }
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .paper { padding: 18px; }
         }
     </style>
 </head>
 <body>
+    <a href="index.html" class="back-link">← 返回首页</a>
 <h1>📚 论文深度精读汇总报告</h1></p><p><strong>生成时间</strong>: 2026-02-16 11:56:26
 <strong>论文数量</strong>: 32</p><p>---</p><p><h1>Paper 1: EnvBench: A Benchmark for Automated Environment Setup</h1></p><p><h1>📖 论文深度精读报告</h1></p><p><strong>论文ID</strong>: 2503.14443
 <strong>标题</strong>: EnvBench: A Benchmark for Automated Environment Setup

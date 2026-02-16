@@ -3,81 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>论文检索与精读</title>
+    <title>论文工具</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        /* 响应式布局 */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
             padding: 20px;
             color: #e0e0e0;
         }
+        .container { max-width: 1200px; margin: 0 auto; }
         
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        /* 响应式头部 */
         .header {
             text-align: center;
             padding: 40px 20px;
             background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
             border-radius: 20px;
             margin-bottom: 30px;
-            backdrop-filter: blur(10px);
         }
-        .header h1 {
-            color: #fff;
-            font-size: clamp(1.8em, 5vw, 2.5em);
-            margin-bottom: 10px;
-        }
-        .header p {
-            color: #b0b0c0;
-            font-size: clamp(0.9em, 2vw, 1.1em);
-        }
+        .header h1 { color: #fff; font-size: 2.2em; margin-bottom: 8px; }
+        .header p { color: #b0b0c0; }
         
-        /* 响应式筛选栏 */
-        .filters {
+        /* Navigation cards */
+        .nav-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .nav-card {
             background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+        }
+        .nav-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+            border-color: #667eea;
+        }
+        .nav-card h2 { color: #fff; font-size: 1.4em; margin-bottom: 10px; }
+        .nav-card p { color: #a0a8c0; font-size: 0.95em; }
+        
+        /* Filter section */
+        .filters {
+            background: rgba(255,255,255,0.08);
             padding: 20px;
             border-radius: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             align-items: center;
-            justify-content: center;
         }
-        .filters > * {
-            flex: '1 1 140px';
-            max-width: 200px;
-        }
-        .filters label {
-            color: #c0c8ff;
-            font-weight: 500;
-            font-size: 14px;
-            white-space: nowrap;
-        }
+        .filters label { color: #c0c8ff; font-weight: 500; font-size: 14px; }
         .filters select, .filters input {
-            width: 100%;
-            background: rgba(40,40,80,0.8);
+            background: rgba(40,40,80,0.9);
             border: 1px solid rgba(102,126,234,0.5);
             color: #fff;
             padding: 10px 14px;
             border-radius: 8px;
             font-size: 14px;
-            outline: none;
-        }
-        .filters select:focus, .filters input:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 10px rgba(102,126,234,0.3);
         }
         .filters button {
-            flex: '0 0 auto';
             padding: 10px 24px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
@@ -85,154 +79,104 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
         }
         
-        /* 响应式卡片网格 */
+        /* Paper cards */
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
-        
         .card {
             background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            padding: 18px;
             border: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            flex-direction: column;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.12);
-            border-color: rgba(102,126,234,0.6);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-        }
-        .card-number {
+        .card:hover { background: rgba(255,255,255,0.12); }
+        .card-num {
             background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            width: 32px;
-            height: 32px;
+            width: 28px; height: 28px;
             border-radius: 50%;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            margin-bottom: 12px;
-        }
-        .card h3 {
-            color: #fff;
-            font-size: clamp(0.95em, 2vw, 1.1em);
-            line-height: 1.5;
-            margin-bottom: 12px;
-            flex: 1;
-        }
-        .card .meta {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-        .card .tag {
-            padding: 4px 12px;
-            border-radius: 20px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
-        .tag-year {
-            background: rgba(59,130,246,0.3);
-            color: #93c5fd;
+        .card h3 { color: #fff; font-size: 1em; line-height: 1.4; margin-bottom: 10px; }
+        .card .tags { display: flex; gap: 8px; margin-bottom: 12px; }
+        .card .tag {
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
         }
-        .tag-sim-high {
-            background: rgba(34,197,94,0.3);
-            color: #86efac;
-        }
-        .tag-sim-mid {
-            background: rgba(234,179,8,0.3);
-            color: #fde047;
-        }
-        .tag-sim-low {
-            background: rgba(156,163,175,0.3);
-            color: #d1d5db;
-        }
+        .tag-year { background: rgba(59,130,246,0.3); color: #93c5fd; }
+        .tag-sim-high { background: rgba(34,197,94,0.3); color: #86efac; }
+        .tag-sim-mid { background: rgba(234,179,8,0.3); color: #fde047; }
+        .tag-sim-low { background: rgba(100,100,120,0.3); color: #a0a0b0; }
         
-        .card .btn {
+        .card a {
             display: block;
             text-align: center;
-            padding: 12px 20px;
+            padding: 10px;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
             font-size: 14px;
-            transition: opacity 0.2s;
-        }
-        .card .btn:hover {
-            opacity: 0.9;
         }
         
-        .stats {
-            text-align: center;
-            color: #888;
-            margin-top: 30px;
-            padding: 20px;
-            font-size: 14px;
-        }
+        .stats { text-align: center; color: #888; margin-top: 20px; padding: 20px; }
         
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            body { padding: 15px; }
-            .header { padding: 25px 15px; }
-            .filters { padding: 15px; }
+        @media (max-width: 600px) {
             .cards { grid-template-columns: 1fr; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .filters > * { width: 100%; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 论文检索与精读</h1>
-            <p>EnvBench / Automated Environment Setup 相关论文</p>
+            <h1>📚 论文工具</h1>
+            <p>检索与精读</p>
         </div>
         
+        <!-- Navigation -->
+        <div class="nav-cards">
+            <a href="search_results.html" class="nav-card">
+                <h2>🔍 论文检索</h2>
+                <p>查看83篇论文检索结果</p>
+            </a>
+            <a href="deep_reading.html" class="nav-card">
+                <h2>📖 精读报告</h2>
+                <p>32篇论文深度分析</p>
+            </a>
+        </div>
+        
+        <!-- Filter -->
         <div class="filters">
-            <div>
-                <label>🔍 搜索论文:</label>
-                <input type="text" id="searchInput" placeholder="输入关键词..." oninput="filterPapers()">
-            </div>
-            <div>
-                <label>📅 年份:</label>
-                <select id="yearFilter" onchange="filterPapers()">
-                    <option value="all">全部年份</option>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                </select>
-            </div>
-            <div>
-                <label>📊 相似度:</label>
-                <select id="simFilter" onchange="filterPapers()">
-                    <option value="all">全部</option>
-                    <option value="100">100%</option>
-                    <option value="90">90%+</option>
-                    <option value="80">80%+</option>
-                    <option value="60">60%+</option>
-                </select>
-            </div>
-            <div>
-                <label>🔄 排序:</label>
-                <select id="sortBy" onchange">
-                    <option="filterPapers() value="sim">按相似度</option>
-                    <option value="year">按年份</option>
-                    <option value="title">按标题</option>
-                </select>
-            </div>
-            <button onclick="filterPapers()">应用筛选</button>
+            <input type="text" id="searchInput" placeholder="搜索论文标题..." oninput="filterPapers()" style="flex:2;min-width:200px;">
+            <select id="yearFilter" onchange="filterPapers()">
+                <option value="all">全部年份</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+            <select id="simFilter" onchange="filterPapers()">
+                <option value="all">全部相似度</option>
+                <option value="100">100%</option>
+                <option value="90">90%+</option>
+                <option value="80">80%+</option>
+                <option value="60">60%+</option>
+            </select>
+            <select id="sortBy" onchange="filterPapers()">
+                <option value="sim">按相似度</option>
+                <option value="year">按年份</option>
+            </select>
         </div>
         
         <div class="cards" id="cardsContainer"></div>
@@ -240,7 +184,7 @@
     </div>
     
     <script>
-        var papers = [{"id": 1, "title": "EnvBench: A Benchmark for Automated Environment Setup", "similarity": 100.0, "year": 2025}, {"id": 2, "title": "Multi-Docker-Eval: A "Shovel of the Gold Rush" Benchmark on Automatic Environment Building for Software Engineering", "similarity": 100.0, "year": 2025}, {"id": 3, "title": "SetupBench: Assessing Software Engineering Agents" Ability to Bootstrap Development Environments", "similarity": 100.0, "year": 2025}, {"id": 4, "title": "Process-Level Trajectory Evaluation for Environment Configuration in Software Engineering Agents", "similarity": 100.0, "year": 2025}, {"id": 5, "title": "MEnvAgent: Scalable Polyglot Environment Construction for Verifiable Software Engineering", "similarity": 98.0, "year": 2026}, {"id": 6, "title": "CVE-Bench: Benchmarking LLM-based Software Engineering Agent"s Ability to Repair Real-World CVE Vulnerabilities", "similarity": 97.0, "year": 2025}, {"id": 7, "title": "HerAgent: Rethinking the Automated Environment Deployment via Hierarchical Test Pyramid", "similarity": 86.0, "year": 2026}, {"id": 8, "title": "GitTaskBench: A Benchmark for Code Agents Solving Real-World Tasks Through Code Repository Leveraging", "similarity": 86.0, "year": 2025}, {"id": 9, "title": "Spider2-V: How Far Are Multimodal Agents From Automating Data Science and Engineering Workflows?", "similarity": 84.0, "year": 2024}, {"id": 10, "title": "IDE-Bench: Evaluating Large Language Models as IDE Agents on Real-World Software Engineering Tasks", "similarity": 83.0, "year": 2026}, {"id": 11, "title": "LoCoBench-Agent: An Interactive Benchmark for LLM Agents in Long-Context Software Engineering", "similarity": 81.0, "year": 2025}, {"id": 12, "title": "SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling", "similarity": 81.0, "year": 2025}, {"id": 13, "title": "SWE-Bench++: A Framework for the Scalable Generation of Software Engineering Benchmarks from Open-Source Repositories", "similarity": 78.0, "year": 2025}, {"id": 14, "title": "Multi-Agent Systems for Dataset Adaptation in Software Engineering: Capabilities, Limitations, and Future Directions", "similarity": 78.0, "year": 2025}, {"id": 15, "title": "SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks", "similarity": 77.0, "year": 2025}, {"id": 16, "title": "Hadoop-Benchmark: Rapid Prototyping and Evaluation of Self-Adaptive Behaviors in Hadoop Clusters", "similarity": 75.0, "year": 2017}, {"id": 17, "title": "Automated Benchmark Generation for Repository-Level Coding Tasks", "similarity": 73.0, "year": 2025}, {"id": 18, "title": "Saving SWE-Bench: A Benchmark Mutation Approach for Realistic Agent Evaluation", "similarity": 72.0, "year": 2025}, {"id": 19, "title": "PIPer: On-Device Environment Setup via Online Reinforcement Learning", "similarity": 70.0, "year": 2025}, {"id": 20, "title": "Skywork-SWE: Unveiling Data Scaling Laws for Software Engineering in LLMs", "similarity": 70.0, "year": 2025}, {"id": 21, "title": "Benchmarking Large Language Models for Root Cause Analysis in Train Control Software Testing", "similarity": 70.0, "year": 2025}, {"id": 22, "title": "SWE-smith: Scaling Data for Software Engineering Agents", "similarity": 69.0, "year": 2025}, {"id": 23, "title": "SWE-bench-java: A GitHub Issue Resolving Benchmark for Java", "similarity": 68.0, "year": 2024}, {"id": 24, "title": "SWE-Master: Unleashing the Potential of Software Engineering Agents via Post-Training", "similarity": 67.0, "year": 2026}, {"id": 25, "title": "TOM-SWE: User Mental Modeling For Software Engineering Agents", "similarity": 65.0, "year": 2025}, {"id": 26, "title": "SWE-Sharp-Bench: A Reproducible Benchmark for C# Software Engineering Tasks", "similarity": 64.0, "year": 2025}, {"id": 27, "title": "SyncMind: Measuring Agent Out-of-Sync Recovery in Collaborative Software Engineering", "similarity": 63.0, "year": 2025}, {"id": 28, "title": "The Atlas Benchmark: an Automated Evaluation Framework for Human Motion Prediction", "similarity": 61.0, "year": 2022}, {"id": 29, "title": "Automated Composition of Agents: A Knapsack Approach for Agentic Component Selection", "similarity": 61.0, "year": 2025}, {"id": 30, "title": "SWE-QA: Can Language Models Answer Repository-level Code Questions?", "similarity": 61.0, "year": 2025}, {"id": 31, "title": "CIPerf: a benchmark for continuous integration services performance and cost analysis", "similarity": 60.0, "year": 2024}, {"id": 32, "title": "SWE-bench Goes Live!", "similarity": 60.0, "year": 2025}];
+        var papers = [{"id":1,"title":"EnvBench: A Benchmark for Automated Environment Setup","similarity":100.0,"year":2025},{"id":2,"title":"Multi-Docker-Eval: A 'Shovel of the Gold Rush' Benchmark on Automatic Environment Building for Software Engineering","similarity":100.0,"year":2025},{"id":3,"title":"SetupBench: Assessing Software Engineering Agents' Ability to Bootstrap Development Environments","similarity":100.0,"year":2025},{"id":4,"title":"Process-Level Trajectory Evaluation for Environment Configuration in Software Engineering Agents","similarity":100.0,"year":2025},{"id":5,"title":"MEnvAgent: Scalable Polyglot Environment Construction for Verifiable Software Engineering","similarity":98.0,"year":2026},{"id":6,"title":"CVE-Bench: Benchmarking LLM-based Software Engineering Agent's Ability to Repair Real-World CVE Vulnerabilities","similarity":97.0,"year":2025},{"id":7,"title":"HerAgent: Rethinking the Automated Environment Deployment via Hierarchical Test Pyramid","similarity":86.0,"year":2026},{"id":8,"title":"GitTaskBench: A Benchmark for Code Agents Solving Real-World Tasks Through Code Repository Leveraging","similarity":86.0,"year":2025},{"id":9,"title":"Spider2-V: How Far Are Multimodal Agents From Automating Data Science and Engineering Workflows?","similarity":84.0,"year":2024},{"id":10,"title":"IDE-Bench: Evaluating Large Language Models as IDE Agents on Real-World Software Engineering Tasks","similarity":83.0,"year":2026},{"id":11,"title":"LoCoBench-Agent: An Interactive Benchmark for LLM Agents in Long-Context Software Engineering","similarity":81.0,"year":2025},{"id":12,"title":"SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling","similarity":81.0,"year":2025},{"id":13,"title":"SWE-Bench++: A Framework for the Scalable Generation of Software Engineering Benchmarks from Open-Source Repositories","similarity":78.0,"year":2025},{"id":14,"title":"Multi-Agent Systems for Dataset Adaptation in Software Engineering: Capabilities, Limitations, and Future Directions","similarity":78.0,"year":2025},{"id":15,"title":"SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks","similarity":77.0,"year":2025},{"id":16,"title":"Hadoop-Benchmark: Rapid Prototyping and Evaluation of Self-Adaptive Behaviors in Hadoop Clusters","similarity":75.0,"year":2017},{"id":17,"title":"Automated Benchmark Generation for Repository-Level Coding Tasks","similarity":73.0,"year":2025},{"id":18,"title":"Saving SWE-Bench: A Benchmark Mutation Approach for Realistic Agent Evaluation","similarity":72.0,"year":2025},{"id":19,"title":"PIPer: On-Device Environment Setup via Online Reinforcement Learning","similarity":70.0,"year":2025},{"id":20,"title":"Skywork-SWE: Unveiling Data Scaling Laws for Software Engineering in LLMs","similarity":70.0,"year":2025},{"id":21,"title":"Benchmarking Large Language Models for Root Cause Analysis in Train Control Software Testing","similarity":70.0,"year":2025},{"id":22,"title":"SWE-smith: Scaling Data for Software Engineering Agents","similarity":69.0,"year":2025},{"id":23,"title":"SWE-bench-java: A GitHub Issue Resolving Benchmark for Java","similarity":68.0,"year":2024},{"id":24,"title":"SWE-Master: Unleashing the Potential of Software Engineering Agents via Post-Training","similarity":67.0,"year":2026},{"id":25,"title":"TOM-SWE: User Mental Modeling For Software Engineering Agents","similarity":65.0,"year":2025},{"id":26,"title":"SWE-Sharp-Bench: A Reproducible Benchmark for C# Software Engineering Tasks","similarity":64.0,"year":2025},{"id":27,"title":"SyncMind: Measuring Agent Out-of-Sync Recovery in Collaborative Software Engineering","similarity":63.0,"year":2025},{"id":28,"title":"The Atlas Benchmark: an Automated Evaluation Framework for Human Motion Prediction","similarity":61.0,"year":2022},{"id":29,"title":"Automated Composition of Agents: A Knapsack Approach for Agentic Component Selection","similarity":61.0,"year":2025},{"id":30,"title":"SWE-QA: Can Language Models Answer Repository-level Code Questions?","similarity":61.0,"year":2025},{"id":31,"title":"CIPerf: a benchmark for continuous integration services performance and cost analysis","similarity":60.0,"year":2024},{"id":32,"title":"SWE-bench Goes Live!","similarity":60.0,"year":2025}];
         
         function getSimClass(sim) {
             if (sim >= 90) return 'tag-sim-high';
@@ -263,28 +207,27 @@
             
             filtered.sort(function(a, b) {
                 if (sort === 'sim') return b.similarity - a.similarity;
-                if (sort === 'year') return b.year - a.year;
-                return a.title.localeCompare(b.title);
+                return b.year - a.year;
             });
             
             var container = document.getElementById('cardsContainer');
             if (filtered.length === 0) {
-                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">没有找到匹配的论文</div>';
+                container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">暂无匹配的论文</div>';
             } else {
                 container.innerHTML = filtered.map(function(p) {
                     return '<div class="card">' +
-                        '<div class="card-number">' + p.id + '</div>' +
+                        '<div class="card-num">' + p.id + '</div>' +
                         '<h3>' + p.title + '</h3>' +
-                        '<div class="meta">' +
-                            '<span class="tag tag-year">📅 ' + p.year + '</span>' +
-                            '<span class="tag ' + getSimClass(p.similarity) + '">📊 ' + p.similarity + '%</span>' +
+                        '<div class="tags">' +
+                            '<span class="tag tag-year">' + p.year + '</span>' +
+                            '<span class="tag ' + getSimClass(p.similarity) + '">' + p.similarity + '%</span>' +
                         '</div>' +
-                        '<a class="btn" href="deep_reading.html#paper-' + p.id + '">查看精读报告</a>' +
+                        '<a href="deep_reading.html#paper-' + p.id + '">查看精读报告</a>' +
                     '</div>';
                 }).join('');
             }
             
-            document.getElementById('stats').textContent = '显示 ' + filtered.length + ' / ' + papers.length + ' 篇论文';
+            document.getElementById('stats').textContent = '共 ' + filtered.length + ' / ' + papers.length + ' 篇论文';
         }
         
         filterPapers();
