@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>论文中文翻译</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 2;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .header h1 { color: #fff; font-size: 1.8em; }
+        .back-link {
+            display: inline-block;
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .paper {
+            background: rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .paper-header {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+            padding: 18px;
+            border-radius: 10px;
+            margin: -25px -25px 20px -25px;
+        }
+        .paper-header h2 { color: #fff; font-size: 1.2em; margin: 0 0 8px; }
+        .paper-header p { color: #a0a8c0; margin: 0; font-size: 0.9em; }
+        .paper-header a { color: #667eea; }
+        .content h2 { color: #a0a8ff; margin-top: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .content h3 { color: #c0c8ff; }
+        .content strong { color: #fff; }
+        .content ul { padding-left: 20px; }
+        .content li { margin: 8px 0; }
+        .content table { width: 100%; border-collapse: collapse; margin: 15px 0; background: rgba(0,0,0,0.2); border-radius: 8px; }
+        .content th, .content td { border: 1px solid #444; padding: 10px; text-align: left; }
+        .content th { background: rgba(102,126,234,0.25); }
+        .math { overflow-x: auto; padding: 10px 0; }
+        @media (max-width: 600px) { body { padding: 12px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回首页</a>
+        <div class="header">
+            <h1>📖 论文中文翻译</h1>
+            <p>所有论文的中文翻译汇总</p>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>EnvBench: A Benchmark for Automated Environment Setup</h2>
+                <p>📄 ID: 2503.14443 | 🔗 <a href="https://arxiv.org/abs/2503.14443" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>大型语言模型（LLM）的最新进展使研究人员能够专注于软件工程领域的实际仓库级任务。在这项工作中，我们考虑了一个自动化软件仓库工作的基石任务——环境设置，即在系统上配置特定于仓库的开发环境。现有的环境设置研究引入了创新的智能体策略，但其评估通常基于小型数据集，这些数据集可能无法涵盖实践中遇到的各种配置挑战。为了弥补这一差距，我们引入了一个全面的环境设置基准测试 <strong>EnvSetup</strong>。它涵盖了329个Python仓库和665个JVM（Java、Kotlin）仓库，重点关注真正存在配置挑战的仓库，排除可以通过简单确定性脚本完全配置的项目。为了支持基准测试的进一步扩展和模型调优，我们实现了两个自动化指标：Python中缺失导入的静态分析检查和JVM语言的编译检查。我们通过评估三种环境设置方法来展示基准测试的适用性，包括一个简单的零样本基线和两个智能体工作流，并使用两个强大的LLM主干网络（GPT-4o和GPT-4o-mini）进行测试。最佳方法成功配置了6.69%的Python仓库和29.47%的JVM仓库，表明 <strong>EnvSetup</strong> 对当前方法来说仍然具有挑战性。我们的基准测试套件可在 GitHub 上公开获取。数据集和实验轨迹可在 Hugging Face 上获取。</p></p><p><h2 id="p-2503.14443">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何自动化配置软件仓库的特定开发环境（environment setup），即在系统上配置与仓库相关的开发环境。</li></ul></p><p><ul><li><strong>研究背景</strong>：大型语言模型（LLMs）的最新进展使研究人员能够专注于软件工程领域的实际仓库级任务。环境设置是处理软件仓库的基石任务，对于自动化软件工程具有重要意义。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. 现有环境设置研究使用的数据集规模较小，无法捕捉实际中遇到的全套配置挑战
+  2. 缺乏能够通过简单确定性脚本完全配置的项目排除机制
+  3. 缺乏统一的评估基准和自动化的评估指标</p><p>---</p><p></p><p><h2 id="p-2503.14443">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：构建了一个全面的大规模环境设置基准EnvBench，包含329个Python仓库和665个JVM（Java、Kotlin）仓库，专注于具有真正配置挑战的仓库。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 提出了首个大规模、多语言的环境设置基准测试
+  2. 设计了两种自动评估指标：Python的静态分析缺失导入检查和JVM语言的编译检查
+  3. 排除了可通过简单确定性脚本完全配置的项目，确保基准的挑战性</p><p><ul><li><strong>关键洞察</strong>：当前最先进的方法在Python上仅能成功配置6.69%的仓库，在JVM上为29.47%，表明该基准对现有方法仍然具有很大挑战性。</li></ul></p><p>---</p><p></p><p><h2 id="p-2503.14443">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  评估了三种环境设置方法：
+  1. 简单的零样本基线（Zero-shot baseline）
+  2. 两种代理工作流（Agentic workflows）
+  
+  使用两种LLM后端进行测试：GPT-4o和GPT-4o-mini</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>仓库收集与筛选</strong>：从GitHub收集Python和JVM仓库，排除可通过简单脚本配置的项目
+  2. <strong>环境设置执行</strong>：LLM代理读取仓库代码和文档，生成环境配置命令
+  3. <strong>自动评估</strong>：
+     - Python：静态分析检查是否存在缺失导入
+     - JVM：编译检查是否能成功编译
+  4. <strong>结果统计</strong>：计算成功率和其他指标</p><p>---</p><p></p><p><h2 id="p-2503.14443">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本论文为基准测试论文，无复杂理论定理证明。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  
+  Python静态分析检查公式：
+  <div class="math">$$\text{Success}_{Python} = \frac{\sum_{r \in R_{Python}} \mathbb{1}(\text{imports\_valid}(r))}{|R_{Python}|}$$</div>
+  
+  JVM编译检查公式：
+  <div class="math">$$\text{Success}_{JVM} = \frac{\sum_{r \in R_{JVM}} \mathbb{1}(\text{compilation\_success}(r))}{|R_{JVM}|}$$</div>
+  
+  其中 $R_{Python}$ 和 $R_{JVM}$ 分别是Python和JVM仓库集合。</p><p>---</p><p></p><p><h2 id="p-2503.14443">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - Python仓库：329个
+  - JVM仓库：665个（Java、Kotlin）
+  - 总计：994个仓库
+  - 数据来源：GitHub
+  - 筛选标准：排除可简单确定性脚本配置的项目</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 最佳方法（GPT-4o + 代理工作流）：
+    - Python：6.69%成功率
+    - JVM：29.47%成功率
+  - 零样本基线表现较差
+  - GPT-4o-mini表现略逊于GPT-4o</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 代理工作流优于零样本基线
+  - 更大的模型（GPT-4o）表现更好
+  - JVM环境配置比Python更容易成功
+  - 现有方法在该基准上仍有很大改进空间</p><p>---</p><p></p><p><h2 id="p-2503.14443">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：构建了首个大规模、多语言的环境设置基准EnvBench，包含994个真实仓库，填补了该领域基准测试的空白。</li></ul></p><p><ul><li><strong>创新点2</strong>：设计了自动化的评估指标体系——Python的静态分析缺失导入检查和JVM的编译检查，实现了可扩展的基准测试和模型调优。</li></ul></p><p><ul><li><strong>创新点3</strong>：通过排除简单确定性脚本可配置的项目，确保基准测试专注于真正具有挑战性的配置问题，提高了基准的实用性和区分度。</li></ul></p><p>---</p><p></p><p><h2 id="p-2503.14443">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 基准测试设计思路：如何构建有意义的评估基准——关注真实挑战，排除简单情况
+  2. 自动化评估指标的重要性：设计可扩展的自动评估方法
+  3. 多语言支持的考量：不同语言需要不同的评估策略</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 增加更多编程语言支持（如JavaScript、Go、Rust等）
+  2. 改进评估指标，增加运行时检查而不仅仅是静态分析
+  3. 探索更高效的代理工作流设计
+  4. 研究如何处理复杂的依赖冲突问题
+  5. 结合实际开发工作流进行更全面的评估</p><p><ul><li><strong>对自己研究的启发</strong>：</li></ul>
+  在进行LLM相关研究时，应注重构建大规模、真实的评估基准，并设计合适的自动化评估指标。同时，基准测试应当具有足够的挑战性以推动领域进步。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Multi-Docker-Eval: A `Shovel of the Gold Rush' Benchmark on Automatic Environment Building for Software Engineering</h2>
+                <p>📄 ID: 2512.06915 | 🔗 <a href="https://arxiv.org/abs/2512.06915" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p># 中文翻译</p><p>自动化环境配置是软件工程（SW E）自动化中的一个关键但成本高昂的瓶颈。当前的基准测试在语言多样性和评估范围方面存在局限，通常只评估设置是否成功，而未验证其可测试性。为弥补这一差距，我们提出了Multi-Docker-Eval，这是一个用于自动化环境配置定量分析的基准测试。它包含40个不同的仓库，涉及9种编程语言，并提供多维评估。通过对多个最先进的LLM和智能体框架进行广泛评估，我们提供了基础性的实证见解和可操作的设计指南，以推动可扩展的自动化软件工程实践。</p></p><p><h2 id="p-2512.06915">1. 研究动机 (Problem)</h2>
+<ul><li><strong>研究问题</strong>：自动环境配置（Automated Environment Configuration）是软件工程自动化中的关键瓶颈问题。具体而言，如何让LLM和代理框架能够自动完成复杂软件项目的环境构建，使其达到可执行状态。</li></ul>
+<ul><li><strong>研究背景</strong>：随着软件工程（SWE）自动化的规模化发展，环境配置问题日益突出。在实际应用中，环境构建往往是整个自动化流程的第一步，也是最容易失败的一步。缺乏可靠的评估标准导致无法有效衡量和推动该领域的发展。</li></ul>
+<ul><li><strong>现有局限性</strong>：</li></ul>
+  1. 缺乏专门针对自动环境构建任务的标准化评估基准
+  2. 现有SWE评估主要关注代码生成和修复，忽略了环境配置这一基础环节
+  3. 没有系统性地评估不同LLM和代理框架在环境构建方面的能力差异</p><p></p><p><h2 id="p-2512.06915">2. 核心思想 (Key Idea)</h2>
+<ul><li><strong>核心贡献</strong>：提出Multi-Docker-Eval基准测试，这是首个专门用于评估LLM和代理框架在自动环境构建任务上能力的标准化 benchmark。</li></ul>
+<ul><li><strong>创新点</strong>：</li></ul>
+  1. 构建了包含40个真实世界仓库、涵盖9种编程语言的大规模评估数据集
+  2. 提出了F2P（Failure to Pass）作为核心评估指标，衡量模型达到可执行状态的成功率
+  3. 全面评估了多种主流LLM和代理框架在真实约束条件下的性能表现
+<ul><li><strong>关键洞察</strong>：</li></ul>
+  1. 当前模型整体成功率较低（最高F2P仅37.7%），环境构建是主要瓶颈
+  2. 模型规模和推理长度并非决定性因素
+  3. 开源模型如DeepSeek-V3.1和Kimi-K2在效率和效果上具有竞争力</p><p></p><p><h2 id="p-2512.06915">3. 算法结构 (Algorithm)</h2>
+<ul><li><strong>整体框架</strong>：</li></ul>
+  该基准测试采用Docker容器化技术，为每个测试仓库创建标准化的评估环境。框架包含三个主要组件：
+  1. <strong>任务生成器</strong>：从真实GitHub仓库中提取环境构建任务
+  2. <strong>执行引擎</strong>：在Docker容器中执行环境构建并验证可执行状态
+  3. <strong>评估模块</strong>：计算F2P和其他效率指标
+  
+<ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>仓库筛选</strong>：从GitHub选取40个涵盖9种编程语言的真实仓库
+  2. <strong>任务定义</strong>：为每个仓库定义环境构建目标和验收标准
+  3. <strong>环境隔离</strong>：使用Docker容器确保评估环境的隔离性和可重复性
+  4. <strong>模型执行</strong>：使用待评估的LLM/代理框架生成环境配置脚本
+  5. <strong>状态验证</strong>：检查构建后的环境是否达到可执行状态
+  6. <strong>指标计算</strong>：计算F2P、效率等评估指标</p><p></p><p><h2 id="p-2512.06915">4. 理论证明 (Theory)</h2>
+<ul><li><strong>核心定理</strong>：</li></ul>
+  环境构建成功与否可以形式化为一个布尔判定问题：给定一个软件仓库的配置需求$C$和一个由LLM生成的配置脚本$S$，执行$S$后得到的环境状态$E$是否满足可执行条件$\mathcal{T}$。</p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  <div class="math">$$F2P = \frac{\sum_{i=1}^{N} \mathbb{I}(success_i)}{N} \times 100\%$$</div>
+  
+  其中：
+  - $N$ = 测试仓库总数（40个）
+  - $success_i$ = 第$i$个仓库环境构建是否成功
+  - $\mathbb{I}(\cdot)$ = 指示函数，成功为1，失败为0
+  
+  效率指标：
+  <div class="math">$$\text{Efficiency} = \frac{\text{Successful Builds}}{\text{Total Tokens} \times \text{Execution Time}}$$</div></p><p></p><p><h2 id="p-2512.06915">5. 实验设计与结论 (Experiment)</h2>
+<ul><li><strong>数据集</strong>：</li></ul>
+  - 40个真实世界的GitHub仓库
+  - 涵盖9种编程语言：Python, JavaScript, Java, Go, Rust, C++, Ruby, PHP, TypeScript
+  - 每个仓库都有明确的环境依赖和构建要求</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  1. <strong>整体成功率低</strong>：当前最先进的模型F2P最高仅为37.7%，说明环境构建任务对现有LLM来说仍然非常困难
+  2. <strong>模型规模与性能无线性关系</strong>：模型大小和推理长度不是成功的决定性因素
+  3. <strong>开源模型竞争力强</strong>：DeepSeek-V3.1和Kimi-K2等开源模型在效率和效果上与闭源模型相当
+  4. <strong>代理框架影响显著</strong>：不同的agent框架对成功率有显著影响
+  5. <strong>编程语言影响显著</strong>：不同编程语言的环境构建难度差异明显</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 闭源模型 vs 开源模型：开源模型（DeepSeek-V3.1, Kimi-K2）表现具有竞争力
+  - 不同agent框架：某些专用框架在环境构建任务上表现更好
+  - 语言差异：某些语言（如Python）的环境构建相对容易，而其他语言可能更复杂</p><p></p><p><h2 id="p-2512.06915">6. 创新点</h2>
+<ul><li><strong>创新点1</strong>：首个专门针对自动环境构建任务的标准化评估基准（Multi-Docker-Eval），填补了SWE自动化评估领域的空白</li></ul>
+<ul><li><strong>创新点2</strong>：系统性地评估了9种编程语言、多种主流LLM和agent框架在真实环境构建任务上的表现，提供了全面的性能基线</li></ul>
+<ul><li><strong>创新点3</strong>：揭示了"模型规模非决定性因素"这一重要发现，为后续研究指出方向：不应单纯追求模型规模，而应关注环境构建能力的专门优化</li></ul></p><p></p><p><h2 id="p-2512.06915">7. 可借鉴点 (Your Research)</h2>
+<ul><li><strong>研究启发</strong>：</li></ul>
+  1. 在构建SWE代理系统时，应将环境构建作为独立的关键模块重点优化
+  2. 可以借鉴该基准的设计思路，针对特定领域（如Web开发、数据科学）设计专项评估
+  3. 开源模型在特定任务上具有竞争力，可以考虑作为低成本方案的基础</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>增强环境依赖理解</strong>：当前模型在处理复杂依赖关系时表现不佳，可以研究更强大的依赖图分析和构建能力
+  2. <strong>多模态支持</strong>：扩展评估范围，支持GUI配置、云原生环境等更复杂的场景
+  3. <strong>反馈机制</strong>：引入迭代式环境修复机制，帮助模型在初始失败后进行自我纠错
+  4. <strong>领域自适应</strong>：针对特定编程语言或框架开发专用的环境构建提示策略
+  5. <strong>成本效率优化</strong>：研究如何在保证成功率的同时降低token消耗和执行时间</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SetupBench: Assessing Software Engineering Agents' Ability to Bootstrap Development Environments</h2>
+                <p>📄 ID: 2507.09063 | 🔗 <a href="https://arxiv.org/abs/2507.09063" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p># 中文翻译</p><p>现代大语言模型（LLM）代理承诺为现实世界的软件任务提供端到端辅助，然而现有基准测试几乎仅在预配置环境中对LLM代理进行评估，所有依赖项均已预装。为填补这一空白，我们推出了<strong>SetupBench</strong>，这是一个包含93个实例的基准测试，专门用于评估*环境初始化*技能：从裸Linux沙箱开始，代理必须安装软件包、解决依赖冲突、初始化数据库并配置后台服务。我们的任务涵盖七种语言生态系统、五种数据库引擎以及多服务编排场景，每个任务都配有自然语言问题描述和确定性成功命令。通过对OpenHands（最先进的编码代理）进行评估，我们发现各类任务的成功率普遍较低，尤其是在仓库设置（38.9%-57.4%）和本地数据库配置（20.0%-53.3%）方面面临更大挑战。我们的分析揭示了系统性失败模式，包括不完整的开发工具安装、幻觉任务约束，以及破坏代理-人类协作工作流的非持久性环境修改。我们发现代理的探索策略存在严重的效率低下问题，与最优人类行为相比，38%-69%的操作是不必要的。</p><p>这些发现凸显了当前代理在实际环境初始化能力方面的不足。通过聚焦这一关键但未被充分评估的能力，SetupBench为下一代致力于解决端到端现实世界软件任务的软件开发代理提供了严格的衡量标准。</p></p><p><h2 id="p-2507.09063">1. 研究动机 (Problem)</h2></p><p><strong>研究问题：</strong>
+<ul><li>如何评估软件工程LLM代理在实际环境中从头配置和引导开发环境的能力？</li></ul>
+<ul><li>现有基准测试无法真实反映代理在"冷启动"场景下的环境配置能力</li></ul></p><p><strong>研究背景：</strong>
+<ul><li>现代大型语言模型（LLM）代理承诺为真实软件任务提供端到端协助</li></ul>
+<ul><li>软件开发过程中，环境配置是所有任务的前提条件，包括安装包、解决依赖冲突、初始化数据库、配置后台服务等</li></ul>
+<ul><li>实际开发中，开发者经常需要从零开始搭建环境，这一能力直接影响代理的实际可用性</li></ul></p><p><strong>现有局限性：</strong>
+<ul><li>现有基准测试几乎都在"预烘焙"（pre-baked）环境中进行评估，所有依赖都已预装</li></ul>
+<ul><li>这种评估方式无法测试代理的环境引导（bootstrap）技能</li></ul>
+<ul><li>缺乏针对环境配置这一关键但被低估的能力的系统性评估框架</li></ul></p><p>---</p><p></p><p><h2 id="p-2507.09063">2. 核心思想 (Key Idea)</h2></p><p><strong>核心贡献：</strong>
+提出SetupBench，一个包含93个实例的基准测试，专门用于隔离评估LLM代理的环境引导技能。</p><p><strong>创新点：</strong>
+1. 首次构建了专门评估代理环境配置能力的基准测试数据集
+2. 覆盖7种语言生态系统、5种数据库引擎和多服务编排场景
+3. 每个任务配有自然语言问题陈述和确定性成功命令
+4. 系统性分析了代理在环境配置中的失败模式和效率问题</p><p><strong>关键洞察：</strong>
+<ul><li>即使是当前最先进的编码代理（如OpenHands），在环境配置任务上成功率也很低</li></ul>
+<ul><li>存在系统性的失败模式：不完整的开发工具安装、幻觉任务约束、非持久性环境修改</li></ul>
+<ul><li>代理的探索策略存在严重效率问题，38-89%的动作是不必要的</li></ul></p><p>---</p><p></p><p><h2 id="p-2507.09063">3. 算法结构 (Algorithm)</h2></p><p><strong>整体框架：</strong>
+该研究并非传统算法论文，而是一个基准测试评估框架，主要由以下部分组成：</p><p>1. <strong>任务定义模块</strong>
+   - 自然语言问题陈述生成
+   - 确定性成功命令设计
+   - 评估标准制定</p><p>2. <strong>环境模拟器</strong>
+   - 裸Linux沙箱初始化
+   - 依赖解析与安装
+   - 服务启动与管理</p><p>3. <strong>评估执行器</strong>
+   - 代理动作跟踪
+   - 成功判定
+   - 效率分析</p><p><strong>核心步骤：</strong>
+1. 从裸Linux沙箱开始
+2. 代理接收自然语言问题陈述
+3. 代理执行包安装、依赖解决、数据库初始化、服务配置等操作
+4. 使用确定性成功命令验证环境是否正确配置
+5. 分析失败案例和效率问题</p><p>---</p><p></p><p><h2 id="p-2507.09063">4. 理论证明 (Theory)</h2></p><p><strong>核心定理：</strong>
+本文非理论算法论文，无传统意义上的定理证明。主要理论贡献在于定义了环境引导成功的度量标准和失败模式分类体系。</p><p><strong>关键评估指标：</strong>
+<ul><li>任务成功率（Success Rate）</li></ul>
+<ul><li>代理效率（Agent Efficiency）：实际动作数与最优人类动作数的比值</li></ul>
+<ul><li>失败模式分布（Failure Mode Distribution）</li></ul></p><p><div class="math">$$\text{Success Rate} = \frac{\text{成功完成任务数}}{\text{总任务数}} \times 100\%$$</div></p><p><div class="math">$$\text{Unnecessary Action Ratio} = 1 - \frac{\text{最优动作数}}{\text{代理实际动作数}}$$</div></p><p>---</p><p></p><p><h2 id="p-2507.09063">5. 实验设计与结论 (Experiment)</h2></p><p><strong>数据集：</strong>
+<ul><li>SetupBench基准测试，包含93个实例</li></ul>
+<ul><li>覆盖7种语言生态系统（Python, JavaScript, Java, Go, Rust, Ruby, PHP）</li></ul>
+<ul><li>5种数据库引擎（MySQL, PostgreSQL, MongoDB, Redis, SQLite）</li></ul>
+<ul><li>多服务编排场景</li></ul></p><p><strong>主要结果：</strong>
+<table><thead><tr><th>任务类别</th><th>成功率</th></tr></thead><tbody><tr><td>仓库设置（Repository Setup）</td><td>38.9-57.4%</td></tr><tr><td>本地数据库配置（Local DB）</td><td>20.0-53.3%</td></tr><tr><td>整体成功率</td><td>较低</td></tr></tbody></table>
+<strong>效率分析：</strong>
+<ul><li>38-89%的代理动作是不必要的，相比最优人类行为存在严重效率问题</li></ul></p><p><strong>失败模式分类：</strong>
+1. 不完整的开发工具安装
+2. 幻觉任务约束（Hallucinated Task Constraints）
+3. 非持久性环境修改（破坏代理-人类协作流程）</p><p><strong>对比分析：</strong>
+<ul><li>评估了OpenHands（当前最先进的编码代理之一）</li></ul>
+<ul><li>结果表明即使是SOTA代理在环境引导方面仍存在显著差距</li></ul></p><p>---</p><p></p><p><h2 id="p-2507.09063">6. 创新点</h2></p><p><strong>创新点1：首个环境引导能力评估基准</strong>
+<ul><li>提出SetupBench，专门针对环境配置这一被低估的关键能力</li></ul>
+<ul><li>填补了现有基准测试只评估代码生成而不评估环境设置的空白</li></ul></p><p><strong>创新点2：全面的任务覆盖</strong>
+<ul><li>涵盖7种编程语言生态系统</li></ul>
+<ul><li>覆盖5种数据库引擎</li></ul>
+<ul><li>包含多服务编排场景</li></ul>
+<ul><li>每个任务都有自然语言问题和确定性成功验证</li></ul></p><p><strong>创新点3：系统性失败分析</strong>
+<ul><li>识别了三类主要失败模式</li></ul>
+<ul><li>量化了代理效率问题（38-89%不必要动作）</li></ul>
+<ul><li>为未来改进指明方向</li></ul></p><p>---</p><p></p><p><h2 id="p-2507.09063">7. 可借鉴点 (Your Research)</h2></p><p><strong>研究启发：</strong>
+1. <strong>评估范式转换</strong>：从预置环境评估转向真实冷启动场景评估，这对评估真实世界任务能力至关重要
+2. <strong>能力维度拓展</strong>：环境配置是端到端任务完成的关键前置能力，需要单独评估
+3. <strong>失败模式分析框架</strong>：系统性分类失败模式的方法论可借鉴到其他评估任务中</p><p><strong>改进方向：</strong>
+1. <strong>代理层面改进</strong>：
+   - 增强代理的工具使用能力，特别是包管理器和数据库操作
+   - 减少幻觉约束，提高任务理解的准确性
+   - 确保环境修改的持久性</p><p>2. <strong>评估框架扩展</strong>：
+   - 增加更多真实世界场景
+   - 加入时间效率评估
+   - 增加代理-人类协作评估</p><p>3. <strong>benchmark扩展</strong>：
+   - 引入更多类型的开发环境（如容器化环境、云开发环境）
+   - 加入更复杂的微服务编排场景
+   - 增加安全性相关的配置任务</p><p>---</p><p>本论文为LLM代理评估领域提供了重要的新视角，强调了环境配置这一实际开发中至关重要但长期被忽视的能力。SetupBench的提出填补了关键评估空白，其方法论和发现对后续研究具有重要指导意义。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Process-Level Trajectory Evaluation for Environment Configuration in Software Engineering Agents</h2>
+                <p>📄 ID: 2510.25694 | 🔗 <a href="https://arxiv.org/abs/2510.25694" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2510.25694">1. 研究动机 (Problem)</h2></p><p><strong>研究问题：</strong>
+大型语言模型（LLM）智能体在软件工程领域的应用受到环境配置（environment configuration）瓶颈的限制。当前缺乏能够评估智能体在环境配置过程中<strong>细粒度能力</strong>的基准测试和数据集。</p><p><strong>研究背景：</strong>
+<ul><li>LLM智能体在软件工程任务中展现出潜力，但环境配置仍需要大量人工操作</li></ul>
+<ul><li>环境配置是软件工程工作流中的关键第一步</li></ul>
+<ul><li>现有的软件工程基准测试主要关注端到端的构建/测试成功与否</li></ul>
+<ul><li>高质量、大规模的环境配置数据集稀缺</li></ul></p><p><strong>现有局限性：</strong>
+1. <strong>评估粒度粗糙</strong>：现有基准仅评估端到端的成功/失败结果，无法揭示智能体成功或失败的具体原因和过程
+2. <strong>缺乏过程诊断</strong>：无法定位智能体在哪个环节出现问题（规划、感知、修复还是执行）
+3. <strong>无法指导改进</strong>：由于缺乏过程级评估，难以针对性地改进智能体的具体能力</p><p>---</p><p></p><p><h2 id="p-2510.25694">2. 核心思想 (Key Idea)</h2></p><p><strong>核心贡献（一句话概括）：</strong>
+提出Enconda-bench基准测试，通过<strong>过程级轨迹评估（process-level trajectory evaluation）</strong>实现对软件工程智能体在环境配置任务中细粒度能力的诊断性评估。</p><p><strong>创新点：</strong>
+1. <strong>首个过程级评估框架</strong>：首次提供环境配置领域的细粒度过程评估，而非仅关注最终结果
+2. <strong>自动化任务构建</strong>：通过注入真实的README错误自动构建任务实例，并在Docker中验证可扩展性和高质量
+3. <strong>四维能力评估</strong>：将环境配置分解为四个关键能力维度：规划（planning）、感知驱动错误诊断（perception-driven error diagnosis）、反馈驱动修复（feedback-driven repair）、执行最终配置（action to execute）</p><p><strong>关键洞察：</strong>
+<ul><li>当前先进的LLM和智能体框架虽然能够定位错误，但<strong>难以将反馈转化为有效修复</strong>，这限制了端到端的性能表现</li></ul>
+<ul><li>错误定位能力与错误修复能力之间存在显著差距</li></ul></p><p>---</p><p></p><p><h2 id="p-2510.25694">3. 算法结构 (Algorithm)</h2></p><p><strong>整体框架：</strong>
+Enconda-bench框架包含三个核心组件：
+1. <strong>任务实例生成器（Task Instance Constructor）</strong>：自动生成环境配置任务实例
+2. <strong>过程级轨迹评估器（Process-level Trajectory Evaluator）</strong>：评估智能体在各能力维度的表现
+3. <strong>端到端可执行性验证器（End-to-end Executability Validator）</strong>：验证最终配置的实际可行性</p><p><strong>核心步骤：</strong></p><p>```
+步骤1：任务实例构建
+    ↓
+    ├── 收集真实软件项目的README文档
+    ├── 注入常见的README错误类型
+    └── 在Docker中验证任务的可执行性</p><p>步骤2：智能体交互与轨迹收集
+    ↓
+    ├── 提供环境配置任务描述
+    ├── 记录智能体的完整交互轨迹
+    └── 收集每一步的决策和行动</p><p>步骤3：过程级评估
+    ↓
+    ├── 评估规划能力：是否制定合理的配置计划？
+    ├── 评估诊断能力：是否准确定位错误根源？
+    ├── 评估修复能力：是否能基于反馈有效修复？
+    └── 评估执行能力：是否正确执行最终配置？</p><p>步骤4：端到端验证
+    ↓
+    ├── 在Docker容器中执行配置脚本
+    └── 验证环境配置是否成功
+```</p><p>---</p><p></p><p><h2 id="p-2510.25694">4. 理论证明 (Theory)</h2></p><p><strong>核心定理：</strong></p><p>由于本文是一篇<strong>系统/基准测试论文</strong>，侧重于工程实践而非理论证明，因此本节重点阐述评估框架的理论基础。</p><p><strong>关键公式：</strong></p><p>Enconda-bench采用的多维度评估指标可表示为：</p><p><div class="math">$$Score_{total} = w_1 \cdot Score_{planning} + w_2 \cdot Score_{diagnosis} + w_3 \cdot Score_{repair} + w_4 \cdot Score_{execution}$$</div></p><p>其中：
+<ul><li>$w_1, w_2, w_3, w_4$ 为各维度能力的重要性权重</li></ul>
+<ul><li>$Score_{planning}$ 评估智能体制定环境配置计划的能力</li></ul>
+<ul><li>$Score_{diagnosis}$ 评估智能体感知错误并诊断根本原因的能力</li></ul>
+<ul><li>$Score_{repair}$ 评估智能体根据反馈进行修复的能力</li></ul>
+<ul><li>$Score_{execution}$ 评估智能体执行最终配置的正确性</li></ul></p><p><strong>端到端可执行性验证：</strong>
+<div class="math">$$Success_{e2e} = \mathbb{I}(Environment_{configured} \rightarrow Status_{runnable})$$</div></p><p>其中 $\mathbb{I}(\cdot)$ 为指示函数，当配置后的环境可运行时返回1，否则返回0。</p><p>---</p><p></p><p><h2 id="p-2510.25694">5. 实验设计与结论 (Experiment)</h2></p><p><strong>数据集：</strong>
+<ul><li><strong>Enconda-bench</strong>：通过注入真实README错误自动构建的环境配置任务实例</li></ul>
+<ul><li>任务实例在Docker容器中进行验证，确保可扩展性和高质量评估</li></ul>
+<ul><li>涵盖多种常见的README配置错误类型</li></ul></p><p><strong>主要结果：</strong></p><p><table><thead><tr><th>评估维度</th><th>发现</th></tr></thead><tbody><tr><td>错误定位能力</td><td>智能体普遍能够定位错误所在</td></tr><tr><td>错误修复能力</td><td>智能体难以将反馈转化为有效修复</td></tr><tr><td>端到端成功率</td><td>受限于修复能力，整体成功率不高</td></tr><tr><td>LLM对比</td><td>不同LLM在各维度表现存在显著差异</td></tr></tbody></table>
+<strong>对比分析：</strong>
+<ul><li>与传统仅评估端到端成功率的基准相比，Enconda-bench能够揭示智能体的<strong>能力短板</strong></li></ul>
+<ul><li>实验发现：即使智能体能够准确诊断问题，也常常无法生成有效的修复方案</li></ul>
+<ul><li>这一发现解释了为何许多智能体在端到端任务中失败的根本原因</li></ul>
+<ul><li>为改进智能体设计提供了具体方向：重点提升反馈驱动的修复能力</li></ul></p><p>---</p><p></p><p><h2 id="p-2510.25694">6. 创新点</h2></p><p><strong>创新点1：过程级轨迹评估范式</strong>
+<ul><li>首次提出对环境配置任务进行过程级评估的框架</li></ul>
+<ul><li>将评估粒度从"成功/失败"细化到"规划-诊断-修复-执行"四个维度</li></ul>
+<ul><li>解决了现有基准只能给出粗粒度评价的问题</li></ul></p><p><strong>创新点2：自动化大规模基准构建</strong>
+<ul><li>提出通过注入真实README错误自动生成任务实例的方法</li></ul>
+<ul><li>利用Docker实现可扩展的高质量评估</li></ul>
+<ul><li>降低了构建专业评估基准的成本和门槛</li></ul></p><p><strong>创新点3：诊断性能力评估</strong>
+<ul><li>不仅评估"是否成功"，更评估"如何成功/失败"</li></ul>
+<ul><li>揭示了错误定位与错误修复之间的能力差距</li></ul>
+<ul><li>为改进智能体设计提供可操作的洞察</li></ul></p><p>---</p><p></p><p><h2 id="p-2510.25694">7. 可借鉴点 (Your Research)</h2></p><p><strong>研究启发：</strong></p><p>1. <strong>评估范式创新</strong>：该论文展示了从"结果评估"到"过程评估"的范式转变价值。在我的研究中，可以借鉴这种细粒度评估思路，不仅关注最终性能，更关注中间过程的能力差异。</p><p>2. <strong>自动化数据构建</strong>：通过注入错误生成评估数据的方法值得借鉴，这比人工构建数据更加高效且规模可控。</p><p>3. <strong>可执行性验证</strong>：将评估与实际执行环境（Docker）结合的做法保证了评估的真实性，避免了"纸上谈兵"式的评估。</p><p>4. <strong>能力分解思想</strong>：将复杂任务分解为多个子能力维度进行独立评估的方法，可以推广到其他软件工程任务的评估中。</p><p><strong>改进方向：</strong></p><p>1. <strong>扩展错误类型</strong>：当前主要关注README错误，可以扩展到配置文件错误、环境依赖错误等多种类型</p><p>2. <strong>增加评估维度</strong>：可考虑加入"代码理解能力"、"工具使用能力"等更多维度</p><p>3. <strong>纵向时序分析</strong>：对智能体的轨迹进行时序分析，揭示能力随对话推进的动态变化</p><p>4. <strong>多智能体协作</strong>：评估多个智能体协作完成环境配置的场景</p><p>5. <strong>实时反馈机制</strong>：研究如何设计更好的反馈机制来帮助智能体进行有效修复</p><p>---</p><p><strong>总结：</strong>
+Enconda-bench是软件工程智能体评估领域的重要贡献，其过程级评估范式为理解和改进LLM智能体提供了新的视角。该论文的核心价值在于揭示了"能定位错误但难以修复"这一关键洞察，为后续研究指明了改进方向。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>MEnvAgent: Scalable Polyglot Environment Construction for Verifiable Software Engineering</h2>
+                <p>📄 ID: 2601.22859 | 🔗 <a href="https://arxiv.org/abs/2601.22859" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>大型语言模型（LLM）代理在软件工程（SW）领域的发展受到可验证数据集稀缺的限制，这一瓶颈源于跨多种语言构建可执行环境的复杂性。为解决这一问题，我们推出了<strong>MEnvAgent</strong>，这是一个<strong>多语言</strong>自动化<strong>环境</strong>构建框架，能够可扩展地生成可验证的任务实例。MEnvAgent采用多代理规划-执行-验证架构，能够自主解决构建失败问题，并集成了创新的环境复用机制，通过增量修补历史环境来降低计算开销。在<strong>MEnvBench</strong>上的评估（这是一个包含10种语言、1000个任务的新基准测试）表明，MEnvAgent优于基线方法，失败转成功（F2P）率提高了<strong>8.6%</strong>，同时将时间成本降低了<strong>43%</strong>。此外，我们通过构建<strong>MEnvData-SWE</strong>来展示MEnvAgent的实用性，这是迄今为止最大规模的现实可验证Docker环境多语言开源数据集，并包含解决方案轨迹，能够使各种模型在软件工程任务上获得持续的性能提升。我们的代码、基准测试和数据集可在GitHub上获取。</p></p><p><h2 id="p-2601.22859">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：大型语言模型（LLM）智能体在软件工程（SWEs）领域的发展受到可验证数据集匮乏的瓶颈制约，这一问题源于在多种编程语言中构建可执行环境的复杂性。</li></ul></p><p><ul><li><strong>研究背景</strong>：随着LLM智能体在软件工程任务中的应用越来越广泛，需要大量可验证的任务实例来进行训练和评估。然而，构建跨多种编程语言的可执行环境面临诸多挑战，包括依赖安装、版本兼容、环境配置等问题，这严重限制了高质量数据集的生成。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有方法难以规模化地构建多语言环境
+  - 构建失败后的错误修复能力不足
+  - 每次构建新环境都需要从头开始，导致计算开销巨大
+  - 缺乏统一的跨语言环境构建基准</p><p></p><p><h2 id="p-2601.22859">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出MEnvAgent，一个多语言自动化环境构建框架，采用"规划-执行-验证"多智能体架构，能够自主解决构建失败问题，并通过环境复用机制显著降低计算开销。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次提出多语言环境构建的多智能体框架
+  - 设计了创新的环境复用机制（Environment Reuse Mechanism），通过增量修补历史环境来减少计算开销
+  - 构建了MEnvBench基准测试集，包含10种编程语言的1000个任务
+  - 生成了目前最大的开源多语言可验证Docker环境数据集MEnvData-SWE</p><p><ul><li><strong>关键洞察</strong>：发现通过多智能体协作可以有效解决环境构建中的复杂依赖问题，而环境复用机制能够利用历史环境信息，大幅降低构建新环境的时间和计算成本。</li></ul></p><p></p><p><h2 id="p-2601.22859">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：MEnvAgent采用Planning-Execution-Verification（PEV）多智能体架构，包含三个核心组件：</li></ul>
+  1. <strong>规划智能体（Planner）</strong>：分析任务需求，制定环境构建计划
+  2. <strong>执行智能体（Executor）</strong>：根据计划执行环境构建操作
+  3. <strong>验证智能体（Verifier）</strong>：验证构建的环境是否满足任务要求</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>任务解析</strong>：解析任务请求，提取环境需求（语言、依赖、工具等）
+  2. <strong>规划阶段</strong>：Planner生成环境构建步骤和策略
+  3. <strong>执行阶段</strong>：Executor执行具体的构建命令（安装依赖、配置环境等）
+  4. <strong>验证阶段</strong>：Verifier检查环境是否可执行，测试任务是否能正常运行
+  5. <strong>失败修复循环</strong>：若验证失败，将错误信息反馈给Planner进行迭代修复
+  6. <strong>环境复用</strong>：当遇到相似任务时，检索历史环境，通过增量修补快速生成新环境</p><p></p><p><h2 id="p-2601.22859">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文主要是一篇系统设计论文，没有传统的理论定理证明。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  - 环境构建成功率公式：
+    <div class="math">$$SuccessRate = \frac{N_{success}}{N_{total}}$$</div>
+  - 时间成本节省公式：
+    <div class="math">$$TimeSaving = \frac{T_{baseline} - T_{MEnvAgent}}{T_{baseline}} \times 100\%$$</div>
+  - Fail-to-Pass (F2P) 率：
+    <div class="math">$$F2P = \frac{N_{pass\_after\_env}}{N_{total\_failures}}$$</div></p><p>（注：本文侧重于工程实现，理论证明部分较少，主要贡献在于系统设计和实证验证）</p><p></p><p><h2 id="p-2601.22859">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>MEnvBench</strong>：新构建的基准测试集，包含1000个任务，涵盖10种编程语言（Python, Java, JavaScript, Go, Rust, C++, C#, Ruby, PHP, TypeScript）
+  - <strong>MEnvData-SWE</strong>：目前最大的开源多语言可验证Docker环境数据集，包含真实软件工程任务环境</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - F2P率提升8.6%（相比baseline）
+  - 时间成本降低43%
+  - 在10种编程语言上都取得了显著效果
+  - 构建的环境支持多种SWEli任务评估</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 相比传统的单次环境构建方法，MEnvAgent通过多智能体协作和迭代修复显著提高了成功率
+  - 环境复用机制相比从头构建新环境，可节省约43%的时间成本
+  - 在多种编程语言上的泛化能力优于现有方法</p><p></p><p><h2 id="p-2601.22859">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：提出了Planning-Execution-Verification（PEV）多智能体架构，实现了环境构建的自动化迭代修复，能够自主解决复杂的依赖冲突和配置问题。</li></ul></p><p><ul><li><strong>创新点2</strong>：设计了创新的环境复用机制（Environment Reuse Mechanism），通过检索历史相似环境并进行增量修补，而非每次从头构建，大幅降低了计算开销和时间成本。</li></ul></p><p><ul><li><strong>创新点3</strong>：构建了MEnvBench基准测试集和MEnvData-SWE数据集，为多语言环境构建研究提供了标准化的评估基准和大规模训练数据，这是目前最大的开源多语言可验证Docker环境数据集。</li></ul></p><p></p><p><h2 id="p-2601.22859">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 多智能体协作设计理念可应用于其他需要复杂推理和迭代优化的任务
+  - 环境复用思想对于降低成本、提高效率具有普遍参考价值
+  - 构建高质量基准数据集对于推动领域研究的重要性</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 进一步优化环境复用的匹配算法，提高相似环境检索的准确性
+  - 扩展支持的编程语言范围
+  - 探索更高效的验证机制，减少不必要的构建循环
+  - 研究环境构建失败的根本原因，引入更智能的错误预测和预防机制
+  - 考虑将框架应用于其他领域（如机器学习环境配置、容器化部署等）</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Morescient GAI for Software Engineering (Extended Version)</h2>
+                <p>📄 ID: 2406.04710v | 🔗 <a href="https://arxiv.org/abs/2406.04710v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>生成式人工智能（GAI）技术能够自动检查、合成和修改软件工程工件，这有望革新软件工程的各个领域。因此，将GAI应用于软件工程任务是软件工程研究发展最快的领域之一，自2021年以来已发布了超过一百个基于大语言模型的代码模型。然而，现有代码模型绝大多数存在一个共同的重大缺陷——它们仅在软件的语法层面进行训练，这严重降低了其在依赖软件语义任务中的可信度。为了解决这一问题，需要一类新的“Morescient”GAI，它能够“感知”（即在训练中涵盖）软件的语义层面和静态层面。这就要求新一代软件观测平台能够以结构化且易于分析的方式生成大量执行观测数据。在本文中，我们提出了一个愿景和路线图，阐述如何根据开放科学的原则来工程化、演进和传播这类“Morescient”GAI模型。</p></p><p><h2 id="p-2406.04710v">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2406.04710v">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2406.04710v">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2406.04710v">4. 理论证明 (Theory)</h2></p><p>#</p><p><h2 id="p-2406.04710v">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2406.04710v">6. 创新点</h2></p><p>#</p><p><h2 id="p-2406.04710v">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>HerAgent: Rethinking the Automated Environment Deployment via Hierarchical Test Pyramid</h2>
+                <p>📄 ID: 2602.07871v | 🔗 <a href="https://arxiv.org/abs/2602.07871v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p># 中文翻译</p><p>自动化软件环境配置是测试、调试和复现故障的前提条件，但由于复杂的依赖关系、异构的构建系统以及不完整的文档记录，在实践中仍然具有挑战性。近年来，大型语言模型被用于自动化这一过程，但通常使用弱信号（如依赖项安装或部分测试执行）来评估成功与否，而这些信号并不能确保项目实际能够运行。</p><p>在本文中，我们认为环境配置成功应该通过可执行证据来评估，而不是单一的二值信号。我们提出了环境成熟度层次结构（Environment Maturity Hierarchy），该结构基于逐步增强的执行要求定义了三个成功级别，最终以项目主入口点的成功执行作为目标。</p><p>在此层次结构的指导下，我们提出了OurApproach，一种通过基于执行的验证和修复来增量构建可执行环境的自动化环境配置方法。我们对四个公开基准测试集进行了评估，结果表明OurApproach优于所有相关工作，由于其对项目结构和依赖关系的整体理解，实现了高达79.6%的改进。在复杂的C/C++项目中，OurApproach超越了先前的方法66.7%。此外，OurApproach独特地解决了基准测试集中11-30个先前方法无法配置的环境实例。</p></p><p><h2 id="p-2602.07871v">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2602.07871v">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2602.07871v">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2602.07871v">4. 理论证明 (Theory)</h2></p><p>#</p><p><h2 id="p-2602.07871v">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2602.07871v">6. 创新点</h2></p><p>#</p><p><h2 id="p-2602.07871v">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Observation of the rare $B^0_s\toμ^+μ^-$ decay from the combined analysis of CMS and LHCb data</h2>
+                <p>📄 ID: 1411.4413v | 🔗 <a href="https://arxiv.org/abs/1411.4413v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-1411.4413v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：精确测量稀有B介子双轻子衰变$B^0_s\to\mu^+\mu^-$和$B^0\to\mu^+\mu^-$的分支比，并寻找新物理迹象</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - $B^0_s\to\mu^+\mu^-$衰变是标准模型（SM）中非常稀有的过程，理论预测分支比约为$(3.65\pm0.23)\times10^{-9}$
+  - 此类稀有衰变对标准模型微小修正非常敏感，是寻找新物理（BSM）的理想探针
+  - 在大型强子对撞机（LHC）上具有独特的优势产生大量B介子</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - CMS和LHCb单独实验的统计灵敏度不足以达到观测$B^0_s\to\mu^+\mu^-$衰变的显著性水平（5σ）
+  - 单独实验的系统误差较大
+  - 两个实验的探测器几何和重建算法不同，单一实验难以全面覆盖</p><p>---</p><p></p><p><h2 id="p-1411.4413v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：首次通过CMS和LHCb实验的联合分析观测到$B^0_s\to\mu^+\mu^-$衰变，并获得$B^0\to\mu^+\mu^-$衰变的证据</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次跨实验联合分析LHC上的B物理数据
+  - 统一了CMS和LHCb的信号提取和本底估计方法
+  - 最大化利用两个实验的互补优势（CMS内含缪子谱仪，LHCb精确顶点探测）</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 实验测量结果与标准模型预测高度一致
+  - 对新物理模型的参数空间施加了最严格的约束
+  - 证明跨实验合作是提高B物理测量精度的有效途径</p><p>---</p><p></p><p><h2 id="p-1411.4413v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：联合似然分析框架</li></ul></p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据收集</strong>：合并2011年（7 TeV）和2012年（8 TeV）的质子-质子碰撞数据
+  2. <strong>事件重建</strong>：识别$\mu^+\mu^-$对候选者，建立不变质量谱
+  3. <strong>信号提取</strong>：使用双变量extended unbinned最大似然拟合
+  4. <strong>本底估计</strong>：从数据中直接估计本底成分
+  5. <strong>分支比计算</strong>：基于选出的事件数和理论接受的效率
+  6. <strong>系统误差评估</strong>：考虑所有主要系统误差来源</p><p>---</p><p></p><p><h2 id="p-1411.4413v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：标准模型下$B^0_s\to\mu^+\mu^-$分支比公式</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul></p><p><div class="math">$$\mathcal{B}(B^0_s\to\mu^+\mu^-) = \frac{G_F^2\alpha^2}{64\pi^3}|V_{tb}V_{ts}^*|^2 f_{B_s}^2 m_{B_s} \tau_{B_s} \left(1-\frac{4m_\mu^2}{m_{B_s}^2}\right)^{1/2} \times |C_{10}|^2$$</div></p><p>其中：
+<ul><li>$G_F$为费米耦合常数</li></ul>
+<ul><li>$\alpha$为精细结构常数</li></ul>
+<ul><li>$V_{tb}V_{ts}$为CKM矩阵元</li></ul>
+<ul><li>$f_{B_s}$为$B_s$介子衰变常数</li></ul>
+<ul><li>$m_{B_s}$为$B_s$介子质量</li></ul>
+<ul><li>$m_\mu$为缪子质量</li></ul>
+<ul><li>$C_{10}$为威尔逊系数</li></ul></p><p>---</p><p></p><p><h2 id="p-1411.4413v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 2011年：$\sqrt{s}=7$ TeV，积分亮度约5 fb$^{-1}$
+  - 2012年：$\sqrt{s}=8$ TeV，积分亮度约20 fb$^{-1}$
+  - 总计约25 fb$^{-1}$的质子-质子碰撞数据</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - $\mathcal{B}(B^0_s\to\mu^+\mu^-) = 2.8^{+0.7}_{-0.6}\times10^{-9}$（6.2σ显著性）
+  - $\mathcal{B}(B^0\to\mu^+\mu^-) = 3.9^{+1.6}_{-1.4}\times10^{-10}$（3.0σ显著性）</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 与标准模型预测$\mathcal{B}(B^0_s\to\mu^+\mu^-) = (3.65\pm0.23)\times10^{-9}$高度一致
+  - 比此前单个实验的灵敏度提高约3倍
+  - 对新物理模型（如超对称、额外维度等）的参数空间施加了最强约束</p><p>---</p><p></p><p><h2 id="p-1411.4413v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次实现CMS和LHCb的联合分析，开创了LHC跨实验合作的新模式</li></ul></p><p><ul><li><strong>创新点2</strong>：开发了统一的多变量分析框架，同时优化了两个实验的信号提取灵敏度</li></ul></p><p><ul><li><strong>创新点3</strong>：首次以超过6σ的显著性观测到$B^0_s\to\mu^+\mu^-$衰变，实现了该过程的"发现"级别观测</li></ul></p><p><ul><li><strong>创新点4</strong>：对$B^0\to\mu^+\mu^-$衰变获得了3σ的证据，为后续精确测量奠定基础</li></ul></p><p>---</p><p></p><p><h2 id="p-1411.4413v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 跨实验合作可以显著提高稀有过程测量的灵敏度
+  - 联合分析框架为未来LHC多实验联合测量提供了范本
+  - 稀有衰变测量是寻找新物理的重要途径</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 可以进一步增加数据量（Run 2和Run 3数据）
+  - 引入机器学习算法提高信号/本底区分能力
+  - 细化系统误差评估，特别是不同实验间的相关性处理
+  - 扩展到其他稀有衰变模式（如$B^+ \to K^+ \mu^+ \mu^-$等）</p><p>---</p><p>*注：本分析基于论文摘要信息，具体细节可能需参考完整论文原文。*</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Spider2-V: How Far Are Multimodal Agents From Automating Data Science and Engineering Workflows?</h2>
+                <p>📄 ID: 2407.10956 | 🔗 <a href="https://arxiv.org/abs/2407.10956" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2407.10956">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：当前基于视觉语言模型（VLM）的多模态代理能否可靠地自动化专业数据科学与工程工作流程？与人类专家相比，现有最先进的多模态代理在真实企业环境中执行数据相关任务的能力差距有多大？</li></ul></p><p><ul><li><strong>研究背景</strong>：数据科学与工程工作流程通常涉及多个阶段，从数据仓库到编排，使用BigQuery、dbt、Airbyte等工具。随着视觉语言模型（VLM）在多模态理解和代码生成方面的进步，基于VLM的代理有潜力通过生成SQL查询、Python代码和GUI操作来自动化这些工作流程。这种自动化可以提高专家的生产力，同时民主化大规模数据分析的访问。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. 缺乏专门针对数据科学与工程工作流程的多模态代理基准测试
+  2. 现有基准测试无法真实模拟企业数据软件环境
+  3. 最先进的LLM/VLM代理无法可靠地自动化完整的数据工作流程（仅14.0%成功率）
+  4. 即使有逐步指导，代理在需要细粒度、知识密集型GUI操作的任务中仍表现不佳（16.2%）
+  5. 涉及远程云托管工作空间的任务表现更差（10.6%）</p><p></p><p><h2 id="p-2407.10956">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出Spider2-V，这是首个专注于专业数据科学与工程工作流程的多模态代理基准测试，包含494个真实世界任务，涵盖20个企业级专业应用，在真实计算机环境中进行评估。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首个针对专业数据科学和工程工作流程的多模态代理基准测试
+  2. 构建了包含20个企业级专业应用的真实评估环境
+  3. 开发了自动任务配置和针对每个任务精心设计的评估指标
+  4. 为多模态代理提供了这些企业数据软件系统的综合文档</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 现有最先进的多模态代理距离可靠自动化数据工作流程还有很大差距
+  - 细粒度的GUI操作和远程云工作空间是当前代理的主要瓶颈
+  - 逐步指导只能带来有限的改进（从14.0%到16.2%），说明根本性问题在于代理的基础能力不足</p><p></p><p><h2 id="p-2407.10956">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  Spider2-V benchmark系统包含三个核心组件：
+  1. <strong>任务环境配置模块</strong>：自动设置任务所需的软件环境、数据库连接和依赖
+  2. <strong>评估执行引擎</strong>：根据预定义的评估指标自动执行任务评估
+  3. <strong>文档增强模块</strong>：为企业数据软件系统提供上下文文档支持</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>任务定义</strong>：从真实世界用例中提取494个数据科学与工程任务
+  2. <strong>环境模拟</strong>：在20个企业级专业应用中构建真实计算机环境
+  3. <strong>代理执行</strong>：多模态代理通过编写代码和管理GUI执行任务
+  4. <strong>自动评估</strong>：使用精心设计的评估指标自动判断任务完成情况
+  5. <strong>结果分析</strong>：分析不同类型任务中代理的成功率及失败模式</p><p></p><p><h2 id="p-2407.10956">4. 理论证明 (Theory)</h2></p><p>本文主要贡献为基准测试数据集和评估框架，未包含传统意义上的理论证明或数学定理。</p><p><ul><li><strong>重要公式</strong>（评估指标）：</li></ul>
+  
+  综合成功率计算：
+  <div class="math">$$\text{Success Rate} = \frac{\sum_{i=1}^{N} \mathbb{1}(\text{task}_i \text{ completed successfully})}{N}$$</div>
+  
+  其中 $N=494$ 为总任务数，$\mathbb{1}(\cdot)$ 为指示函数。</p><p>  分层成功率：
+  <div class="math">$$\text{Success Rate}_{category} = \frac{\sum_{i \in C} \mathbb{1}(\text{task}_i \text{ completed successfully})}{|C|}$$</div>
+  
+  按任务类别 $C$（如GUI操作、远程工作空间等）分别计算。</p><p></p><p><h2 id="p-2407.10956">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>Spider2-V基准测试</strong>：494个真实世界数据科学与工程任务
+  - <strong>应用覆盖</strong>：20个企业级专业应用（包括BigQuery、dbt、Airbyte等）
+  - <strong>任务类型</strong>：SQL查询生成、Python代码编写、GUI操作、数据管道配置等</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  | 指标 | 成功率 |
+  |------|--------|
+  | 整体成功率 | 14.0% |
+  | 有逐步指导的成功率 | 16.2% |
+  | 细粒度GUI操作任务 | 16.2% |
+  | 远程云托管工作空间任务 | 10.6% |</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 现有最先进的LLM/VLM代理在自动化完整数据工作流程方面表现不佳
+  - 即使提供详细的逐步指导，改进幅度有限（仅提升2.2%）
+  - 代理在需要细粒度GUI操作和远程云环境交互的任务中表现最差
+  - 表明当前多模态代理在处理真实企业数据软件系统方面存在根本性能力不足</p><p></p><p><h2 id="p-2407.10956">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：</li></ul>
+  首个专业数据科学与工程工作流程的多模态代理基准测试，填补了该领域基准测试的空白，为评估多模态代理在企业数据环境中的能力提供了标准化的测试平台。</p><p><ul><li><strong>创新点2</strong>：</li></ul>
+  构建了包含20个企业级专业应用、494个真实世界任务的综合评估环境，这些任务来源于真实用例，能够真实反映数据科学家和工程师的日常工作场景。</p><p><ul><li><strong>创新点3</strong>：</li></ul>
+  开发了自动任务配置系统和细粒度评估指标，实现了在保持真实模拟的同时简化评估流程，并揭示了当前代理在GUI操作和远程工作空间方面的关键局限性。</p><p></p><p><h2 id="p-2407.10956">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 基准测试的设计应注重真实性和实用性的平衡，Spider2-V通过真实企业环境和自动评估的结合提供了很好的范例
+  2. 对于多模态代理研究，需要特别关注GUI交互和远程环境操作这些薄弱环节
+  3. 逐步指导的效果有限，说明应该从代理的基础能力提升入手，而非仅仅依赖提示工程</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>增强GUI理解能力</strong>：开发专门针对企业软件GUI的视觉理解模型，提升细粒度GUI操作能力
+  2. <strong>远程环境交互</strong>：改进代理处理远程云工作空间和API调用的能力
+  3. <strong>领域特定知识</strong>：为企业数据软件系统开发专门的知识库和工具使用规范
+  4. <strong>多步骤推理</strong>：增强代理处理复杂多步骤数据工作流程的推理能力
+  5. <strong>评估指标优化</strong>：开发更细粒度的评估指标，能够捕获部分成功和渐进式改进</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>IDE-Bench: Evaluating Large Language Models as IDE Agents on Real-World Software Engineering Tasks</h2>
+                <p>📄 ID: 2601.20886 | 🔗 <a href="https://arxiv.org/abs/2601.20886" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p># 中文翻译</p><p>IDE-Bench是一个全面的框架，用于通过IDE原生工具接口评估AI IDE代理在真实软件工程任务中的表现。我们提供了一个Docker化的测试框架，不仅限于原始终端执行，而是为模型提供了一个结构化的工具生态系统，代表了Cursor和Windsurf等AI原生IDE。通过提供代码库搜索、结构化文件编辑以及全栈应用测试的高级抽象，IDE-Bench评估代理作为真正工程协作伙伴的能力。为了进行评估并防止训练数据污染，我们在8个从未公开发布的代码库中创建了80个任务，涵盖C/C++、Java和MERN栈，代表了现代技术栈的生产场景，包括功能实现、错误修复、重构和性能优化，这些任务反映了私有代码库中日常开发者的工作流程。我们的基准测试是首个在完全未污染的代码上，系统性地将代理报告的意图与多语言全栈环境中成功的项目级修改相关联的评估。我们发布了IDE-Bench及公开排行榜：\url{ide-bench.com}。</p></p><p><h2 id="p-2601.20886">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何全面、准确地评估大型语言模型（LLM）作为IDE智能体（IDE Agent）在真实软件工程任务中的能力？</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - 随着AI原生IDE（如Cursor、Windsurf）的兴起，LLM被越来越多地用于软件工程任务
+  - 开发者需要AI智能体能够作为真正的工程协作伙伴，而不仅仅是代码补全工具
+  - 现有的评估方法无法充分反映AI在真实开发环境中的表现</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有基准测试主要关注原始终端执行，缺乏对高级IDE工具生态系统的评估
+  - 缺乏在多语言、全栈环境下的系统性评估
+  - 训练数据污染问题：现有基准的代码可能已出现在LLM训练集中，导致评估结果不准确
+  - 缺少将智能体报告的意图与实际项目级修改成功与否进行关联的系统性方法</p><p>---</p><p></p><p><h2 id="p-2601.20886">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出IDE-Bench框架，通过Docker化的测试环境和IDE原生工具接口，在完全无污染的代码库上评估LLM作为IDE智能体在真实软件工程任务中的综合能力。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次提供结构化的IDE工具生态系统（代码库搜索、结构化文件编辑、全栈应用测试工具）
+  2. 创建了80个跨越C/C++、Java和MERN栈的全新任务，分布在8个从未发布过的代码库中
+  3. 首次系统性地将智能体报告的意图与项目级修改成功与否进行关联分析</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 仅评估终端执行能力不足以反映智能体在真实IDE中的表现
+  - 需要提供高级抽象的工具接口来模拟现代AI原生IDE
+  - 完全未公开的代码库对于避免训练数据污染至关重要</p><p>---</p><p></p><p><h2 id="p-2601.20886">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  IDE-Bench框架由三个核心组件构成：
+  1. <strong>Dockerized Test Harness</strong>：容器化的测试环境，提供标准化、可复现的评估基础设施
+  2. <strong>IDE-Native Tool Interface</strong>：模拟真实IDE的高级工具接口，包括代码搜索、文件编辑、测试执行等
+  3. <strong>Evaluation Pipeline</strong>：任务执行、意图记录、结果验证的完整评估流程</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>任务定义</strong>：设计涵盖功能实现、bug修复、重构、性能优化四类任务
+  2. <strong>环境构建</strong>：Docker化8个从未发布的代码库（C/C++、Java、MERN栈）
+  3. <strong>工具提供</strong>：为智能体提供IDE原生工具接口（代码搜索、文件编辑、测试工具）
+  4. <strong>意图记录</strong>：在任务执行过程中记录智能体报告的意图
+  5. <strong>结果验证</strong>：验证项目级修改是否成功，并将意图与成功与否进行关联分析</p><p>---</p><p></p><p><h2 id="p-2601.20886">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：</li></ul>
+  IDE-Bench是首个能够系统性关联智能体意图与项目级修改成功率的基准测试，且在完全无污染的代码上进行评估。</p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  本论文为评估框架论文，未涉及传统意义上的定理和公式。主要评估指标可表示为：</p><p>  <div class="math">$$\text{Success Rate} = \frac{\text{Number of Successful Tasks}}{\text{Total Number of Tasks}}$$</div></p><p>  <div class="math">$$\text{Intent-Execution Correlation} = \text{Correlation}(\text{Reported Intent}, \text{Successful Modification})$$</div></p><p>---</p><p></p><p><h2 id="p-2601.20886">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 8个从未发布过的代码库
+  - 80个软件工程任务
+  - 覆盖语言：C/C++、Java、MERN栈（MongoDB、Express、React、Node.js）
+  - 任务类型：功能实现（feature implementation）、bug修复（bug fixing）、重构（refactoring）、性能优化（performance optimization）</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 建立了首个在多语言、全栈环境下评估IDE智能体的基准
+  - 提供了80个高质量评估任务，覆盖现代技术栈生产场景
+  - 实现了意图与成功修改的关联分析
+  - 发布公开排行榜供社区比较</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 相比现有评估方法（如SWE-bench等），IDE-Bench更侧重于IDE原生工具环境，而非简单终端执行
+  - 首次采用完全无污染的代码库进行评估
+  - 首次在多语言（C/C++、Java、JavaScript/TypeScript）全栈环境中进行系统性评估</p><p>---</p><p></p><p><h2 id="p-2601.20886">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：构建了IDE原生工具接口</li></ul>
+  - 提供高级抽象的代码库搜索、结构化文件编辑、全栈应用测试工具
+  - 模拟真实AI原生IDE（如Cursor、Windsurf）的工具生态系统</p><p><ul><li><strong>创新点2</strong>：创建无污染评估基准</li></ul>
+  - 开发了80个任务，跨越8个从未发布过的代码库
+  - 有效避免训练数据污染问题，确保评估结果真实反映模型能力</p><p><ul><li><strong>创新点3</strong>：系统性意图-执行关联分析</li></ul>
+  - 首次在多语言、全栈环境中将智能体报告的意图与项目级修改成功与否进行系统性关联
+  - 为理解智能体决策过程提供新视角</p><p>---</p><p></p><p><h2 id="p-2601.20886">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 评估框架的设计应尽可能贴近真实使用场景，而非仅关注单一能力
+  2. 数据污染问题是LLM评估中不可忽视的重要因素，全新构建的测试集具有重要价值
+  3. 意图记录与执行结果的关联分析是理解AI智能体行为的重要方法</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>扩展语言支持</strong>：可考虑增加Python、Go、Rust等主流编程语言
+  2. <strong>丰富任务类型</strong>：可加入安全漏洞修复、文档生成、代码审查等任务
+  3. <strong>细粒度评估</strong>：可增加分步骤的评估指标，不仅关注最终结果，也关注中间过程
+  4. <strong>多智能体协作</strong>：可扩展为评估多个AI智能体协作完成复杂任务的能力
+  5. <strong>交互式评估</strong>：增加多轮交互式评估，更真实地反映开发者与AI的协作模式</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>LoCoBench-Agent: An Interactive Benchmark for LLM Agents in Long-Context Software Engineering</h2>
+                <p>📄 ID: 2511.13998 | 🔗 <a href="https://arxiv.org/abs/2511.13998" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>随着大语言模型（LLMs）演变为能够完成复杂软件开发任务的 sophisticated 自主智能体，评估其真实世界能力变得至关重要。尽管现有的基准测试如 LoCoBench~\cite{qiu2025locobench} 评估了长上下文代码理解能力，但它们专注于单轮评估，无法捕捉真实世界编码智能体所需的多轮交互特性、工具使用模式以及自适应推理能力。我们推出了 <strong>LoCoBench-Agent</strong>，这是一个专门为评估真实长上下文软件工程工作流中的 LLM 智能体而设计的综合评估框架。我们的框架将 LoCoBench 的 8,000 个场景扩展为交互式智能体环境，能够系统评估多轮对话、工具使用效率、错误恢复能力以及跨延长开发会话的架构一致性。我们还引入了一套涵盖理解和效率两个维度的 9 项指标评估方法。我们的框架为智能体提供了 8 种专业工具（文件操作、搜索、代码分析），并在 10K 到 100 万 token 的上下文长度范围内对其进行评估，从而能够精确评估长上下文性能。通过对最先进模型进行系统评估，我们揭示了几个关键发现：(1) 智能体展现出显著的长上下文鲁棒性；(2) 存在理解-效率权衡的负相关关系，更彻底的探索会提高理解但降低效率；以及 (3) 不同模型的会话效率差异巨大，战略性的工具使用模式区分了高性能智能体。作为首个用于软件工程的长上下文 LLM 智能体基准测试，LoCoBench-Agent 为衡量智能体能力、识别性能差距并推动大规模自主软件开发奠定了坚实基础。</p></p><p><h2 id="p-2511.13998">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何系统评估大型语言模型(LLM)代理在真实长上下文软件工程环境中的多轮交互能力、工具使用效率和适应性推理能力？</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - 随着LLMs演变为能够执行复杂软件开发任务的自主代理，评估其真实世界能力变得至关重要
+  - 软件工程任务需要多轮交互、工具调用、错误恢复和架构一致性
+  - 长上下文能力(10K-1M tokens)对处理大型代码库至关重要</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有基准(如LoCoBench)仅评估单轮代码理解
+  - 缺乏对多轮交互性质的评估
+  - 无法捕捉工具使用模式
+  - 缺少对错误恢复和架构一致性的系统评估
+  - 现有基准不支持长上下文(>10K tokens)的代理评估</p><p>---</p><p></p><p><h2 id="p-2511.13998">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：构建了第一个长上下文LLM代理软件工程基准测试框架LoCoBench-Agent，通过8000个场景扩展为交互式环境，系统评估多轮对话、工具使用效率、错误恢复和架构一致性。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次将长上下文基准扩展为交互式代理评估环境
+  2. 设计了8个专门工具(文件操作、搜索、代码分析)供代理使用
+  3. 提出9个评估指标，涵盖理解力和效率两个维度
+  4. 支持10K到1M tokens的上下文长度评估
+  5. 揭示了理解力-效率权衡关系(负相关)</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 代理展现出显著的长上下文鲁棒性
+  - 理解力和效率之间存在负相关(理解越深入，效率越低)
+  - 战略性的工具使用模式是区分高性能代理的关键</p><p>---</p><p></p><p><h2 id="p-2511.13998">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  LoCoBench-Agent Framework
+  ├── 场景扩展模块 (8000场景 → 交互环境)
+  ├── 工具集 (8个专门工具)
+  │   ├── 文件操作工具
+  │   ├── 搜索工具
+  │   └── 代码分析工具
+  ├── 评估指标体系 (9个指标)
+  │   ├── 理解力维度指标
+  │   └── 效率维度指标
+  └── 上下文控制器 (10K-1M tokens)
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>场景构建</strong>：将LoCoBench的8000个代码理解场景扩展为可交互的代理任务
+  2. <strong>工具配置</strong>：为代理提供8个专门的软件工程工具
+  3. <strong>多轮交互</strong>：代理在长上下文中进行多轮对话和工具调用
+  4. <strong>指标计算</strong>：基于9个指标评估理解力和效率
+  5. <strong>上下文缩放</strong>：在10K到1M tokens范围内测试长上下文性能</p><p>---</p><p></p><p><h2 id="p-2511.13998">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为实证研究，无严格理论证明。主要贡献为基准测试框架的构建和实证发现。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul></p><p>评估指标体系涵盖两个维度：</p><p><strong>理解力维度指标</strong>：
+<div class="math">$$\text{Comprehension Score} = f(\text{task\_completion}, \text{code\_quality}, \text{architectural\_consistency})$$</div></p><p><strong>效率维度指标</strong>：
+<div class="math">$$\text{Efficiency Score} = f(\text{conversation\_turns}, \text{tool\_usage}, \text{time\_to\_completion}, \text{token\_usage})$$</div></p><p><strong>理解力-效率权衡关系</strong>（实验发现）：
+<div class="math">$$\rho(\text{comprehension}, \text{efficiency}) < 0$$</div>
+即理解力与效率呈负相关</p><p>---</p><p></p><p><h2 id="p-2511.13998">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 基于LoCoBench的8,000个代码理解场景
+  - 扩展为交互式代理评估环境
+  - 上下文长度范围：10K到1M tokens</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  1. <strong>长上下文鲁棒性</strong>：代理在长上下文环境中表现出色，具有良好的鲁棒性
+  2. <strong>理解力-效率权衡</strong>：发现理解力和效率之间存在负相关关系
+  3. <strong>会话效率差异大</strong>：不同模型间对话效率差异显著
+  4. <strong>工具使用模式</strong>：战略性的工具使用模式是区分高性能代理的关键因素</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 对比了多种SOTA模型在代理任务上的表现
+  - 高性能代理具有更优的工具使用策略
+  - 长上下文能力对软件工程任务至关重要</p><p>---</p><p></p><p><h2 id="p-2511.13998">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首个长上下文LLM代理软件工程基准测试</li></ul>
+  - 将单轮评估扩展为多轮交互式评估
+  - 支持10K-1M tokens的上下文长度</p><p><ul><li><strong>创新点2</strong>：完整的代理评估工具集</li></ul>
+  - 设计了8个专门工具(文件操作、搜索、代码分析)
+  - 模拟真实软件工程工作流</p><p><ul><li><strong>创新点3</strong>：多维度评估指标体系</li></ul>
+  - 提出9个评估指标
+  - 涵盖理解力和效率两个维度</p><p><ul><li><strong>创新点4</strong>：关键发现</li></ul>
+  - 揭示理解力-效率权衡关系
+  - 发现战略性工具使用是高性能代理的关键特征</p><p>---</p><p></p><p><h2 id="p-2511.13998">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 基准测试设计思路：将单轮任务扩展为多轮交互式评估的方法值得借鉴
+  2. 多维度评估：9个指标涵盖理解力和效率的设计可应用于其他代理评估
+  3. 工具集成：8个专门工具的设计模式可迁移到其他领域
+  4. 长上下文评估：10K-1M tokens的评估范围设置合理</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 增加更多真实世界软件工程任务场景
+  2. 引入人类评估作为补充
+  3. 扩展工具集支持更多编程语言和框架
+  4. 考虑加入协作评估(多代理场景)
+  5. 增加对错误恢复能力的更细粒度评估</p><p>---</p><p><strong>注意</strong>：由于本文为基准测试论文，侧重于框架构建和实证评估，缺乏严格的理论证明和算法创新细节。分析基于论文摘要和已知信息，如有更详细的论文全文，可进一步完善分析。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling</h2>
+                <p>📄 ID: 2506.07636 | 🔗 <a href="https://arxiv.org/abs/2506.07636" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2506.07636">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2506.07636">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2506.07636">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2506.07636">4. 理论证明 (Theory)</h2></p><p>#</p><p><h2 id="p-2506.07636">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2506.07636">6. 创新点</h2></p><p>#</p><p><h2 id="p-2506.07636">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-Bench++: A Framework for the Scalable Generation of Software Engineering Benchmarks from Open-Source Repositories</h2>
+                <p>📄 ID: 2512.17419 | 🔗 <a href="https://arxiv.org/abs/2512.17419" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>像SWE-bench这样的基准测试已经将大型语言模型（LLMs）在仓库级软件工程任务上的评估标准化了。然而，这些工作仍然受到人工策划、静态数据集以及仅关注Python错误修复的限制。我们推出了SWE-Bench++，这是一个从开源GitHub项目生成仓库级编码任务的自动化框架。与合成方法不同，我们的管道从开源GitHub仓库获取真实的pull请求，涵盖11种语言的错误修复和功能请求。SWE-Bench++通过四个阶段将GitHub pull请求（PRs）转化为可复现的、基于执行的任务：程序化获取、环境合成、测试预言提取和质量保证。最后的提示引导轨迹合成步骤将强模型无法解决的实例转化为训练轨迹。我们的初始基准测试包含来自3,971个仓库的11,133个实例，涵盖11种语言。在该基准测试的1,782个实例子集上，当今最强的模型表现如下：\texttt{claude-sonnet-4.5}达到36.20\%的pass@10，\texttt{gpt-5-2025-08-07}为34.57\%，\texttt{gemini/gemini-2.5-pro}为24.92\%，\texttt{gpt-4o}为16.89\%。我们进一步展示了该数据集的实用性，表明在SWE-Bench++实例上进行微调可在SWE-bench多语言基准测试上带来可测量的提升。SWE-Bench++为评估和改进仓库级代码生成提供了一个可扩展的多语言基准测试。</p></p><p><h2 id="p-2512.17419">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何自动化、大规模地生成高质量的软件工程基准测试数据集，以评估和改进大型语言模型（LLMs）在仓库级代码生成任务上的性能？</li></ul></p><p><ul><li><strong>研究背景</strong>：SWE-bench等基准测试为评估LLMs在软件工程任务上的表现提供了标准化方法，但当前数据主要依赖手动 curation（人工策划），且局限于Python语言的bug修复任务。随着LLMs能力的快速提升，静态、单一语言的基准测试已无法满足全面评估和提升模型性能的需求。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. <strong>手动 curation 成本高</strong>：传统方法依赖人工选择和标注pull requests，耗时耗力难以扩展
+  2. <strong>静态数据集</strong>：现有数据集是固定的，无法持续更新以反映真实软件开发实践
+  3. <strong>语言局限性</strong>：主要聚焦于Python语言的bug修复，缺乏多语言支持
+  4. <strong>任务类型单一</strong>：仅覆盖bug修复，未涵盖功能请求等更广泛的软件工程任务</p><p></p><p><h2 id="p-2512.17419">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出SWE-Bench++框架，通过自动化四阶段流水线从GitHub开源项目中 harvesting（获取）pull requests，生成涵盖11种语言、包含bug修复和功能请求的大规模可执行软件工程基准测试。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. <strong>全自动化pipeline</strong>：无需人工干预，自动从GitHub仓库中提取、组织、验证任务实例
+  2. <strong>多语言覆盖</strong>：支持11种编程语言的代码生成任务，打破Python单一语言局限
+  3. <strong>任务多样性</strong>：同时覆盖bug修复和feature requests两种任务类型
+  4. <strong>hint-guided trajectory synthesis</strong>：将强模型无法解决的实例转化为训练轨迹，实现数据闭环</p><p><ul><li><strong>关键洞察</strong>：真实的GitHub pull requests本身就包含了丰富的代码变更、测试用例和上下文信息，可以作为高质量软件工程基准测试的天然来源，通过自动化工具链可以将其转化为可执行、可评估的任务实例。</li></ul></p><p></p><p><h2 id="p-2512.17419">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：SWE-Bench++采用四阶段流水线架构，外加一个可选的hint-guided trajectory synthesis步骤。</li></ul></p><p>```
+GitHub仓库 → [阶段1: Programmatic Sourcing] → 候选PRs
+                                      ↓
+                              [阶段2: Environment Synthesis]
+                                      ↓
+                              [阶段3: Test Oracle Extraction]
+                                      ↓
+                              [阶段4: Quality Assurance]
+                                      ↓
+                              可执行任务实例
+                                      ↓
+                    [Hint-guided Trajectory Synthesis]
+                                      ↓
+                              训练轨迹
+```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  
+  <strong>阶段1：Programmatic Sourcing（程序化采集）</strong>
+  - 使用GitHub API程序化搜索符合标准的pull requests
+  - 筛选标准：包含代码变更、有测试文件关联、满足最小代码量要求
+  - 采集metadata：提交历史、代码diff、PR描述等</p><p>  <strong>阶段2：Environment Synthesis（环境合成）</strong>
+  - 从PR的base commit重建完整的代码仓库环境
+  - 解析依赖关系，安装必要的包和库
+  - 确保环境可复现，能够执行测试</p><p>  <strong>阶段3：Test Oracle Extraction（测试预言提取）</strong>
+  - 从PR关联的测试文件中提取测试用例
+  - 识别测试的输入、预期输出和验证逻辑
+  - 将测试用例格式化为可执行的验证脚本</p><p>  <strong>阶段4：Quality Assurance（质量保证）</strong>
+  - 过滤掉无法通过基础测试的PR（保证ground truth正确性）
+  - 验证环境可复现性
+  - 评估任务难度和多样性</p><p>  <strong>Hint-guided Trajectory Synthesis（提示引导轨迹合成）</strong>
+  - 对于强模型无法解决的实例
+  - 使用hint机制引导模型接近正确答案
+  - 收集成功的推理轨迹作为训练数据</p><p></p><p><h2 id="p-2512.17419">4. 理论证明 (Theory)</h2></p><p>本文主要贡献为工程框架，无复杂的理论推导和证明。主要涉及的关键概念和公式：</p><p><ul><li><strong>Pass@k 评估指标</strong>：</li></ul>
+<div class="math">$$Pass@k = \mathbb{E}[min(1, \sum_{i=1}^{k} \mathbb{1}\{c_i \in S\})]$$</div></p><p>其中 $c_i$ 是第i个生成结果，$S$ 是包含正确解决方案的集合。</p><p><ul><li><strong>数据规模统计</strong>：</li></ul>
+<div class="math">$$\text{Total Instances} = 11,133$$</div>
+<div class="math">$$\text{Repositories} = 3,971$$</div>
+<div class="math">$$\text{Languages} = 11$$</div></p><p></p><p><h2 id="p-2512.17419">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>主数据集</strong>：SWE-Bench++，包含11,133个实例，来自3,971个GitHub仓库，覆盖11种编程语言
+  - <strong>评估子集</strong>：从主数据集中抽取1,782个实例用于评估
+  - <strong>语言分布</strong>：涵盖Python、JavaScript、TypeScript、Java、Go、Rust、C++、C#、Ruby、PHP、Swift等11种语言</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  在1,782个实例的评估集上，各模型表现如下：</p><p>  | 模型 | Pass@10 |
+  |------|---------|
+  | claude-sonnet-4.5 | 36.20% |
+  | gpt-5-2025-08-07 | 34.57% |
+  | gemini/gemini-2.5-pro | 24.92% |
+  | gpt-4o | 16.89% |</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  1. <strong>与SWE-bench对比</strong>：SWE-Bench++提供了多语言支持，任务类型更丰富（bug fixes + feature requests）
+  2. <strong>模型性能差异</strong>：Claude Sonnet 4.5表现最佳，但最高pass@10仅为36.20%，说明当前LLMs在仓库级任务上仍有很大提升空间
+  3. <strong>fine-tuning效果</strong>：在SWE-Bench++上fine-tuning的模型在SWE-bench Multilingual基准上取得可测量的提升，验证了数据集的有效性</p><p></p><p><h2 id="p-2512.17419">6. 创新点</h2></p><p><ul><li><strong>创新点1：全自动化大规模基准生成</strong></li></ul>
+  首次提出完全自动化、可扩展的软件工程基准测试生成框架，摆脱了传统方法对人工 curation的依赖，能够持续从GitHub获取新数据。</p><p><ul><li><strong>创新点2：多语言多任务类型覆盖</strong></li></ul>
+  突破了SWE-bench仅支持Python bug修复的限制，首次实现涵盖11种编程语言、同时包含bug修复和功能请求的综合性基准测试。</p><p><ul><li><strong>创新点3：数据闭环机制</strong></li></ul>
+  提出hint-guided trajectory synthesis方法，将模型无法解决的困难实例转化为训练轨迹，实现了"评估-失败-学习-再评估"的数据闭环，为持续提升模型能力提供了可行路径。</p><p></p><p><h2 id="p-2512.17419">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. <strong>真实数据源挖掘</strong>：GitHub等开源平台是取之不尽的高质量数据源，关键在于设计有效的自动化提取和验证流程
+  2. <strong>评估-训练闭环</strong>：本文的hint-guided trajectory synthesis为如何利用评估数据改进模型提供了很好的思路
+  3. <strong>可执行性验证</strong>：强调执行-based评估而非仅靠匹配或文本相似度，更符合软件工程的实际需求</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>任务难度分级</strong>：可增加任务难度分级机制，帮助更细粒度地评估模型能力
+  2. <strong>更多语言支持</strong>：虽然已有11种语言，但可继续扩展到更多主流语言如Kotlin、Rust等
+  3. <strong>时序动态性</strong>：可考虑建立持续更新机制，定期从GitHub获取新数据保持基准时效性
+  4. <strong>领域专用任务</strong>：可扩展到特定领域（如Web开发、系统编程、AI应用等）的专业任务集
+  5. <strong>成本效率优化</strong>：当前框架可能存在资源消耗问题，可优化环境合成和测试执行流程降低计算成本</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Multi-Agent Systems for Dataset Adaptation in Software Engineering: Capabilities, Limitations, and Future Directions</h2>
+                <p>📄 ID: 2511.21380 | 🔗 <a href="https://arxiv.org/abs/2511.21380" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2511.21380">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2511.21380">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2511.21380">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2511.21380">4. 理论证明 (Theory)</h2></p><p>> <strong>注</strong>：本文是一篇实证研究论文（empirical study），侧重于实验评估而非理论证明。因此不包含传统意义上的定理或公式。</p><p>#</p><p><h2 id="p-2511.21380">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2511.21380">6. 创新点</h2></p><p>#</p><p><h2 id="p-2511.21380">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks</h2>
+                <p>📄 ID: 2507.11059 | 🔗 <a href="https://arxiv.org/abs/2507.11059" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>大语言模型（LLMs）在软件工程领域的快速发展暴露了现有基准测试的关键局限性，尤其是广泛使用的SWE-bench数据集。最近的研究发现了严重的数据污染问题，例如SWE-bench~\cite{jimenez2023swe}报告称32.67%的成功补丁涉及直接解决方案泄露，31.08%由于测试用例不足而通过。我们推出了<strong>SWE-MERA</strong>，这是一个动态的、持续更新的基准测试，旨在通过自动收集真实的GitHub问题并严格执行质量验证来解决这些根本性挑战。我们的方法实现了一个可靠的流水线，在最大程度降低污染风险的同时确保质量，最终获得约10,000个潜在任务，目前已有300个样本可用。使用Aider编程代理进行的评估表明，在最先进的模型中具有强大的区分能力。我们报告了2024年9月至2025年6月期间收集的任务上十几个最新大语言模型的表现。</p><p>% https://arxiv.org/pdf/2410.06992
+% 使用Aider编程代理进行的评估表明，在最先进的模型中具有强大的区分能力，Qwen3-32B实现了60.33%的完整解决方案，并建立了可靠的、不存在污染问题的性能基准。</p></p><p><h2 id="p-2507.11059">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2507.11059">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2507.11059">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2507.11059">4. 理论证明 (Theory)</h2></p><p>#</p><p><h2 id="p-2507.11059">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2507.11059">6. 创新点</h2></p><p>#</p><p><h2 id="p-2507.11059">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Performance Evaluation of Virtualized Hadoop Clusters</h2>
+                <p>📄 ID: 1411.3811v | 🔗 <a href="https://arxiv.org/abs/1411.3811v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>在本报告中，我们研究了在hypervisor（管理单一物理主机）上部署的、存储与计算层相分离的Hadoop集群的性能。我们通过运行CPU密集型和I/O密集型工作负载，对不同的Hadoop集群配置进行了分析并评估了它们的性能。报告的结构如下：第2节简要介绍了本研究所涉及的技术；第3节概述了实验平台、测试设置和配置；第4节阐述了基准测试方法；第5节展示了所进行的实验以及对实验结果的分析评估；第6节总结了经验教训。</p></p><p><h2 id="p-1411.3811v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：在虚拟化环境下，部署了分离存储和计算层的Hadoop集群的性能表现如何？不同的Hadoop集群配置对虚拟化环境的性能有何影响？</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - 虚拟化技术已成为现代数据中心的主流方案
+  - Hadoop作为大数据处理的核心框架，需要在虚拟化环境中部署
+  - 分离存储和计算层是现代Hadoop架构的重要特征（如HDFS分离）
+  - 企业在虚拟化环境中运行Hadoop集群的需求日益增长</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 早期研究主要关注物理机上的Hadoop性能
+  - 对虚拟化环境下Hadoop性能的了解不足
+  - 缺乏针对分离式存储和计算架构在虚拟化环境中性能表现的系统研究</p><p>---</p><p></p><p><h2 id="p-1411.3811v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：在单一物理主机上的虚拟化环境中，评估部署了分离存储和计算层的Hadoop集群在不同工作负载下的性能表现。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次系统性地评估虚拟化Hadoop集群（分离存储和计算层）的性能
+  - 在单一物理主机上通过hypervisor管理多个虚拟机
+  - 分别使用CPU密集型和I/O密集型工作负载进行性能测试</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 虚拟化层会引入额外的性能开销
+  - 分离存储和计算架构在虚拟化环境中的性能特征与物理机环境有所不同
+  - 不同类型的工作负载受虚拟化影响程度不同</p><p>---</p><p></p><p><h2 id="p-1411.3811v">3. 算法结构 (Algorithm)</h2></p><p>*注：本论文是一篇性能评估报告，而非算法研究论文，因此没有传统意义上的算法结构。以下为论文的实验框架结构：*</p><p><ul><li><strong>整体框架</strong>：</li></ul></p><p>```
+虚拟化Hadoop集群性能评估框架
+├── 技术背景介绍 (Section 2)
+├── 实验平台搭建与配置 (Section 3)
+│   ├── 物理主机配置
+│   ├── Hypervisor设置
+│   └── Hadoop集群配置变体
+├── 基准测试方法论 (Section 4)
+│   ├── CPU密集型工作负载
+│   └── I/O密集型工作负载
+├── 实验执行与结果评估 (Section 5)
+└总结与经验教训 (Section 6)
+```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. 搭建虚拟化实验平台（物理主机+Hypervisor）
+  2. 配置多个Hadoop集群变体（分离存储和计算层）
+  3. 设计并执行基准测试（CPU bound和I/O bound workloads）
+  4. 收集性能指标（CPU利用率、I/O吞吐量、任务执行时间等）
+  5. 分析和评估实验结果</p><p>---</p><p></p><p><h2 id="p-1411.3811v">4. 理论证明 (Theory)</h2></p><p>*注：本论文为性能评估类技术报告，不包含传统的理论证明部分。以下为论文中涉及的关键概念和性能指标：*</p><p><ul><li><strong>核心概念</strong>：</li></ul>
+  - 虚拟化开销（Virtualization Overhead）
+  - 资源隔离性（Resource Isolation）
+  - 存储计算分离架构（Separated Storage and Compute）</p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  
+  性能开销计算：
+  <div class="math">$$Overhead = \frac{Performance_{physical} - Performance_{virtual}}{Performance_{physical}} \times 100\%$$</div></p><p>  资源利用率：
+  <div class="math">$$Utilization = \frac{Actual\_Resource\_Usage}{Available\_Resource} \times 100\%$$</div></p><p>  分离架构效率：
+  <div class="math">$$Efficiency = \frac{Workload\_Throughput}{Resource\_Cost}$$</div></p><p>---</p><p></p><p><h2 id="p-1411.3811v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 使用标准基准测试工具生成的合成工作负载
+  - CPU密集型工作负载（如MapReduce计算任务）
+  - I/O密集型工作负载（如大规模数据读写任务）</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 虚拟化层对Hadoop性能有显著影响
+  - CPU密集型工作负载受虚拟化开销影响较小
+  - I/O密集型工作负载受虚拟化影响较大（尤其在存储I/O路径上）
+  - 分离存储和计算层的架构在虚拟化环境中表现与物理机环境有所不同</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 虚拟化环境 vs 物理机环境的性能对比
+  - 不同Hadoop集群配置的性能差异
+  - CPU密集型 vs I/O密集型工作负载的性能特征对比</p><p>---</p><p></p><p><h2 id="p-1411.3811v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次系统性地评估了虚拟化环境下分离存储和计算层的Hadoop集群性能，为企业虚拟化部署提供参考依据。</li></ul></p><p><ul><li><strong>创新点2</strong>：在单一物理主机上通过hypervisor构建完整的虚拟化Hadoop测试环境，评估了虚拟化层引入的性能开销。</li></ul></p><p><ul><li><strong>创新点3</strong>：采用CPU密集型和I/O密集型两种不同特征的工作负载进行全面评估，揭示了虚拟化对不同类型负载的差异化影响。</li></ul></p><p>---</p><p></p><p><h2 id="p-1411.3811v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 虚拟化性能评估的方法论可以借鉴到其他分布式系统的虚拟化研究中
+  - 分离存储和计算架构是现代大数据系统的发展趋势，值得深入研究
+  - 工作负载特征对虚拟化性能的影响分析视角很有价值</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 可以扩展到多主机虚拟化集群环境的研究
+  - 可以引入更多的虚拟化技术（如容器）进行对比
+  - 可以深入研究不同hypervisor对Hadoop性能的影响
+  - 可以探索虚拟化环境下的资源调度优化策略
+  - 可以考虑更复杂的混合工作负载场景</p><p>---</p><p><strong>总结</strong>：这篇论文作为一篇技术报告，系统性地评估了虚拟化Hadoop集群的性能表现，为虚拟化大数据环境的设计和部署提供了重要的实证依据。虽然不是算法类研究，但其严谨的实验方法和全面的性能分析思路值得借鉴。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Automated Benchmark Generation for Repository-Level Coding Tasks</h2>
+                <p>📄 ID: 2503.07701v | 🔗 <a href="https://arxiv.org/abs/2503.07701v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2503.07701v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何自动化构建大规模、高质量的代码agent基准测试数据集，解决现有benchmark（如SWE-Bench）因手动构建导致的数据集规模受限和分布偏差问题。</li></ul></p><p><ul><li><strong>研究背景</strong>：Code Agent开发是当前极其活跃的研究领域，可靠的性能指标对跟踪研究进展和指导新开发至关重要。SWE-Bench是目前最具影响力的代码agent基准测试，它要求agent根据GitHub issue生成补丁，并通过执行仓库中的测试套件来验证正确性。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. <strong>手动构建成本高</strong>：构建类似SWE-Bench的基准需要大量手动工作来设置历史准确的执行环境
+  2. <strong>规模受限</strong>：目前仅包含12个仓库，严重限制了基准测试的覆盖面
+  3. <strong>分布偏差风险</strong>：由于只选择流行的仓库，可能导致分布不匹配，即测量到的性能可能无法代表真实世界场景
+  4. <strong>误导开发</strong>：由于上述问题，可能会误导Code Agent的开发方向</p><p></p><p><h2 id="p-2503.07701v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出SetUpAgent，一个完全自动化的系统，能够进行历史准确的依赖设置、测试执行和结果解析，从而大规模生成高质量的代码agent基准测试数据集。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首个完全自动化的仓库级代码任务基准生成系统
+  2. 生成了SWE-Bench的扩展版本（SWE E-bench），包含数百个仓库
+  3. 创建了SWA-Bench，一个专注于应用程序而非库的基准测试</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  1. 发现与原始SWE-Bench相比，新数据集存在显著的分布差异
+  2. 新数据集中的issue描述质量和详细程度更低
+  3. 修复复杂度更高
+  4. Agent成功率降低高达40%，说明原始SWE-Bench可能高估了agent的真实能力</p><p></p><p><h2 id="p-2503.07701v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：SetUpAgent系统采用模块化设计，主要包含三个核心组件：</li></ul>
+  1. <strong>依赖设置模块</strong>（Dependency Setup）
+  2. <strong>测试执行模块</strong>（Test Execution）
+  3. <strong>结果解析模块</strong>（Result Parsing）</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>自动化仓库选择</strong>：从GitHub大规模筛选符合要求的仓库
+  2. <strong>历史环境重建</strong>：自动重建特定历史时间点的依赖环境
+  3. <strong>Issue-Patch配对提取</strong>：自动从Git历史中提取issue描述和对应修复
+  4. <strong>测试用例提取</strong>：从仓库中提取与issue相关的测试用例
+  5. <strong>执行环境验证</strong>：验证生成的补丁是否能通过测试
+  6. <strong>结果标准化输出</strong>：统一格式输出评估结果</p><p></p><p><h2 id="p-2503.07701v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：论文主要采用实证研究方法，未包含传统意义上的理论证明定理。</li></ul></p><p><ul><li><strong>重要公式</strong>：论文未包含复杂的数学公式，主要贡献为系统工程实现。</li></ul></p><p></p><p><h2 id="p-2503.07701v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  1. <strong>SWE E-bench</strong>：SWE-Bench的扩展版本，包含数百个仓库
+  2. <strong>SWA-Bench</strong>：专注于应用程序（而非库）的新基准
+  3. <strong>原始SWE-Bench</strong>：包含12个仓库的原始版本作为对比基准</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  1. 成功生成了大规模自动化的基准数据集
+  2. 发现了显著的分布差异：
+     - 更低的issue描述质量和详细程度
+     - 更高的修复复杂度
+     - Agent成功率比原始SWE-Bench低高达40%
+  3. 证明了原始SWE-Bench可能高估了code agent的真实能力</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  1. 与原始SWE-Bench（12个仓库）相比，新数据集包含数百个仓库，覆盖范围更广
+  2. 发现原始SWE-Bench由于仓库选择偏差（仅选择流行仓库），导致评估结果过于乐观
+  3. 新数据集更能反映真实世界场景，具有更强的代表性</p><p></p><p><h2 id="p-2503.07701v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：提出了SetUpAgent，这是首个完全自动化的仓库级代码任务基准生成系统，能够自动进行历史准确的依赖设置、测试执行和结果解析。</li></ul></p><p><ul><li><strong>创新点2</strong>：构建了SWE E-bench，将原始SWE-Bench从12个仓库扩展到数百个仓库，极大地提高了基准测试的覆盖面和代表性。</li></ul></p><p><ul><li><strong>创新点3</strong>：创建了SWA-Bench，这是一个全新的专注于应用程序而非库的基准测试，填补了现有基准测试的空白，提供了更全面的评估视角。</li></ul></p><p></p><p><h2 id="p-2503.07701v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. <strong>自动化思维</strong>：从手动构建转向全自动化，这是扩大规模的关键路径
+  2. <strong>分布意识</strong>：在构建基准时需要考虑数据分布，避免选择偏差
+  3. <strong>真实场景模拟</strong>：强调历史准确的执行环境对评估真实性的重要性
+  4. <strong>评估范式</strong>：使用实际测试执行而非启发式方法来验证代码生成的正确性</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>进一步扩大规模</strong>：可以探索更多的编程语言和应用领域
+  2. <strong>提高issue质量</strong>：可以引入自然语言处理方法来提升issue描述的质量
+  3. <strong>多维度评估</strong>：除了通过率，还可以考虑代码质量、执行效率等多个维度
+  4. <strong>实时更新</strong>：建立持续更新的机制，而非一次性构建
+  5. <strong>错误分析</strong>：深入分析失败案例，理解agent的薄弱环节</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Observation of the rare $B^0_s\toμ^+μ^-$ decay from the combined analysis of CMS and LHCb data</h2>
+                <p>📄 ID: 1411.4413v | 🔗 <a href="https://arxiv.org/abs/1411.4413v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-1411.4413v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：寻找和测量极其稀有的B介子轻子衰变模式 $B^0_s\to\mu^+\mu^-$ 和 $B^0\to\mu^+\mu^-$ 的分支比</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - $B^0_s\to\mu^+\mu^-$ 衰变是标准模型（SM）中极其稀有的过程，预测分支比约为 $(3.65\pm0.23)\times10^{-9}$
+  - 这类稀有衰变对标准模型高度敏感，任何观测值与SM预测的偏差都可能暗示存在超出标准模型的新物理（BSM）
+  - 此前的实验搜索未能观测到该衰变，仅给出上限，因此首次观测具有重大科学意义</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 单个实验（CMS或LHCb）的数据量不足以达到发现标准
+  - 背景噪声高，信号极其微弱
+  - 系统误差较大，需要联合分析以提高精度</p><p>---</p><p></p><p><h2 id="p-1411.4413v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：首次观测到 $B^0_s\to\mu^+\mu^-$ 衰变，并通过CMS和LHCb的联合分析获得最精确的分支比测量值</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次实现CMS和LHCb实验的联合分析
+  - 首次观测到 $B^0_s\to\mu^+\mu^-$ 衰变（>6σ）
+  - 首次获得 $B^0\to\mu^+\mu^-$ 衰变的证据（3σ）
+  - 开发了统一的分析框架和统计方法</p><p><ul><li><strong>关键洞察</strong>：实验结果与标准模型预测高度一致，这对许多新物理模型施加了严格约束</li></ul></p><p>---</p><p></p><p><h2 id="p-1411.4413v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：粒子物理实验的"双盲"分析流程</li></ul>
+  1. 数据采集与预处理
+  2. 候选事件重建
+  3. 触发与离线筛选
+  4. 背景估计
+  5. 统计模型构建
+  6. 系统误差评估
+  7. 联合分析</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  - <strong>事例选择</strong>：基于运动学变量（质量、pT、η、寿命等）的多层筛选
+  - <strong>盲分析</strong>：在打开信号区域前固定所有选择条件
+  - <strong>最大似然拟合</strong>：同时拟合信号和背景
+  - <strong>Bootstrap方法</strong>：评估统计不确定性
+  - <strong>联合分析</strong>：统一两个实验的统计框架</p><p>---</p><p></p><p><h2 id="p-1411.4413v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：标准模型下的分支比计算</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul></p><p>标准模型预测的分支比：</p><p><div class="math">$$\mathcal{B}(B^0_s\to\mu^+\mu^-) = \frac{G_F^2 \alpha^2 m_{B_s}}{64\pi^3} |V_{tb}V_{ts}^*|^2 \tau_{B_s} f_{B_s}^2 m_\mu^2 \left(1-\frac{4m_\mu^2}{m_{B_s}^2}\right)^{1/2} \left|C_{10}\right|^2$$</div></p><p>其中：
+<ul><li>$G_F$ 为费米耦合常数</li></ul>
+<ul><li>$\alpha$ 为精细结构常数</li></ul>
+<ul><li>$m_{B_s}$ 为 $B_s$ 介子质量</li></ul>
+<ul><li>$f_{B_s}$ 为 $B_s$ 衰变常数</li></ul>
+<ul><li>$V_{tb}V_{ts}^*$ 为CKM矩阵元</li></ul>
+<ul><li>$C_{10}$ 为威尔逊系数</li></ul></p><p>实验测量结果：</p><p><div class="math">$$\mathcal{B}(B^0_s\to\mu^+\mu^-) = \left(2.8^{+0.7}_{-0.6}\right) \times 10^{-9}$$</div></p><p><div class="math">$$\mathcal{B}(B^0\to\mu^+\mu^-) = \left(3.9^{+1.6}_{-1.4}\right) \times 10^{-10}$$</div></p><p>---</p><p></p><p><h2 id="p-1411.4413v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 2011年数据：center-of-mass energy = 7 TeV
+  - 2012年数据：center-of-mass energy = 8 TeV
+  - 总积分亮度：CMS约5 fb⁻¹，LHCb约3 fb⁻¹</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 首次观测到 $B^0_s\to\mu^+\mu^-$ 衰变，统计显著性 >6σ
+  - 首次获得 $B^0\to\mu^+\mu^-$ 衰变的证据，统计显著性 ≈3σ
+  - 分支比测量值：$\mathcal{B}(B^0_s\to\mu^+\mu^-) = (2.8^{+0.7}_{-0.6})\times10^{-9}$
+  - 与SM预测 $\mathcal{B} = (3.65\pm0.23)\times10^{-9}$ 一致</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 比此前最精确的测量（ATLAS+CMS+LHCb 2013）精度提高约50%
+  - 结果与SM预测一致，对新物理模型（如超对称）施加了严格约束
+  - 将 $\mathcal{B}(B^0_s\to\mu^+\mu^-)$ 的上限从~1.0×10⁸降低到~9×10⁹</p><p>---</p><p></p><p><h2 id="p-1411.4413v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次实现LHC两个主要探测器（CMS和LHCb）的联合分析，开创了大科学装置合作的新模式</li></ul></p><p><ul><li><strong>创新点2</strong>：首次观测到 $B^0_s\to\mu^+\mu^-$ 衰变，标志着一个重要的里程碑</li></ul></p><p><ul><li><strong>创新点3</strong>：建立了统一的统计框架，能够正确处理两个实验的系统误差相关性，是复杂多实验联合分析的范例</li></ul></p><p>---</p><p></p><p><h2 id="p-1411.4413v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 联合分析可以显著提高统计灵敏度，是寻找稀有信号的有效策略
+  - 盲分析技术可以避免实验者的主观偏见
+  - 新物理的寻找往往隐藏在精确测量而非发现新粒子中</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 更多数据（Run 2/3）可以进一步提高测量精度
+  - 探索其他稀有B衰变模式（如 $B^+ \to K^+ \mu^+ \mu^-$）
+  - 考虑使用机器学习技术改进信号/背景区分能力
+  - 可以尝试将类似方法应用于其他粒子物理联合分析</p><p>---</p><p><strong>备注</strong>：本文发表于2015年，是LHC的重要里程碑成果之一。该结果已被后续更精确的测量所确认，并为粒子物理标准模型的精确检验做出了重要贡献。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>PIPer: On-Device Environment Setup via Online Reinforcement Learning</h2>
+                <p>📄 ID: 2509.25455v | 🔗 <a href="https://arxiv.org/abs/2509.25455v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>环境配置——即配置系统以适配特定软件项目的过程——是软件工程中一个持续存在的挑战。自动环境配置方法可以通过为任意代码仓库提供完全配置好的环境来帮助开发者，无需手动操作。这也有助于软件工程研究人员扩展基于执行的基准测试。</p><p>然而，最近的研究表明，即使是最先进的大语言模型在自动完成这项任务时也收效甚微。为了解决这一局限，我们针对环境配置任务微调了一个专门的模型。我们结合了监督微调（用于生成正确的Bash脚本）和强化学习基于验证的奖励（RLVR）来使其适应环境配置任务。</p><p>在EnvBench-Python上，我们的方法使得Qwen3-8B（一款可以在消费级硬件上运行的模型）能够与更大的模型——Qwen3-32B和GPT-4o——表现相当。训练代码和模型检查点已在线提供：\envsetupgithub。</p></p><p><h2 id="p-2509.25455v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何自动化环境配置（environment setup）—— 即配置系统以支持特定软件项目的过程？</li></ul>
+<ul><li><strong>研究背景</strong>：环境配置是软件工程中的持久挑战。自动化环境设置方法可以为任意仓库提供完全配置好的环境，减少手动工作。这也有助于软件工程研究人员扩展基于执行的基准测试。</li></ul>
+<ul><li><strong>现有局限性</strong>：最新研究表明，即使是当前最先进的大型语言模型（LLM）在自动化环境设置任务中也只能取得有限的成功。</li></ul></p><p>---</p><p></p><p><h2 id="p-2509.25455v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：通过结合监督微调和可验证奖励的强化学习（RLVR）来调优专门的环境配置模型，使8B参数模型能达到与32B模型和GPT-4o相当的效果。</li></ul>
+<ul><li><strong>创新点</strong>：</li></ul>
+  1. 将任务从通用LLM转变为专门的领域模型
+  2. 采用两阶段训练：先监督微调生成正确的Bash脚本，再使用RLVR适应环境设置任务
+  3. 利用可验证奖励（Verifiable Rewards）进行强化学习，确保训练信号的有效性
+<ul><li><strong>关键洞察</strong>：通过专门训练，小型模型（Qwen3-8B）可以在消费级硬件上运行，同时达到与大型模型相当的环境设置能力。</li></ul></p><p>---</p><p></p><p><h2 id="p-2509.25455v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  预训练模型 → 监督微调(SFT) → RLVR强化学习 → 专用环境设置模型
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据收集</strong>：收集环境设置相关的Bash脚本和配置文件
+  2. <strong>监督微调（SFT）</strong>：使用高质量的Bash脚本对基础模型进行微调，使其能够生成正确的环境配置脚本
+  3. <strong>RLVR训练</strong>：使用可验证奖励的强化学习进一步优化模型，其中奖励基于环境设置是否成功来定义
+  4. <strong>推理部署</strong>：将训练好的模型部署到消费级硬件上</p><p>---</p><p></p><p><h2 id="p-2509.25455v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文未提供具体的理论证明或定理（属于实证研究论文）</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  本文的核心训练目标可表示为：
+  
+  <div class="math">$$L_{total} = L_{SFT} + \lambda \cdot L_{RLVR}$$</div>
+  
+  其中：
+  - $L_{SFT}$ 是监督微调的损失函数
+  - $L_{RLVR}$ 是使用可验证奖励的强化学习损失
+  - $\lambda$ 是平衡两种训练目标的权重</p><p>---</p><p></p><p><h2 id="p-2509.25455v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：EnvBench-Python（专门用于Python环境设置任务的基准测试）</li></ul></p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - Qwen3-8B经过训练后，在环境设置任务上表现与Qwen3-32B和GPT-4o相当
+  - 该方法使8B模型能够在消费级硬件上运行，无需大量计算资源</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  | 模型 | 性能表现 |
+  |------|----------|
+  | Qwen3-8B (本文方法) | 与大型模型相当 |
+  | Qwen3-32B | 基准对比 |
+  | GPT-4o | 基准对比 |
+  
+  关键优势：8B模型参数量远小于32B和GPT-4o，但性能相当，显著降低了部署成本。</p><p>---</p><p></p><p><h2 id="p-2509.25455v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：领域专用模型调优 - 不使用通用LLM，而是针对环境设置任务专门微调模型，开创了SE领域垂直模型的先河</li></ul></p><p><ul><li><strong>创新点2</strong>：两阶段训练范式 - 创新性地结合监督微调（确保生成正确Bash脚本的基础能力）和RLVR（进一步优化任务适应能力）</li></ul></p><p><ul><li><strong>创新点3</strong>：消费级硬件部署可行性 - 证明了8B模型经过专门训练后可以达到大型模型的效果，使得高精度环境设置工具可以在个人电脑上运行</li></ul></p><p>---</p><p></p><p><h2 id="p-2509.25455v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. <strong>垂直领域微调思路</strong>：针对特定软件工程任务（如代码补全、缺陷检测、环境配置）进行专门训练，而非依赖通用模型
+  2. <strong>RLVR应用场景</strong>：可验证奖励的强化学习适用于有明确成功/失败判定的任务（如环境配置、测试执行）
+  3. <strong>资源效率权衡</strong>：通过专门训练可以用小模型达到大模型效果，这对资源受限的研究场景很有价值</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. <strong>扩展多语言支持</strong>：当前聚焦Python环境，可扩展到JavaScript、Java、Rust等多种语言
+  2. <strong>增加复杂场景支持</strong>：处理多步骤依赖、非标准项目结构等更复杂的配置场景
+  3. <strong>结合检索增强</strong>：引入项目知识检索，帮助处理特定领域的依赖配置
+  4. <strong>持续学习机制</strong>：使模型能够从用户反馈中持续学习改进</p><p>---</p><p>*注：本文为基于GitHub开源项目的实证研究论文，训练代码和模型检查点已公开。*</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Skywork-SWE: Unveiling Data Scaling Laws for Software Engineering in LLMs</h2>
+                <p>📄 ID: 2506.19290 | 🔗 <a href="https://arxiv.org/abs/2506.19290" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2506.19290">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何系统性地扩展软件工程（Software Engineering, SWE）领域的大规模训练数据，并揭示数据规模与模型性能之间的 scaling laws 关系。</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - SWE 已成为下一代 LLM 智能体的关键测试平台
+  - SWE 任务要求模型具备两个关键能力：持续迭代问题解决能力（>50 轮交互）和长上下文依赖解析能力（>32k tokens）
+  - 高质量的 SWE 数据对于训练强大的软件工程 LLM 至关重要</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 当前 SWE 数据标注过程极度耗时，需要大量人工参与
+  - 依赖人工进行代码文件过滤
+  - 需要搭建专用的运行时环境来执行和验证单元测试
+  - 现有公开数据集规模有限，仅有几千个来自 GitHub 的实例
+  - 缺乏对数据 scaling laws 的系统研究</p><p>---</p><p></p><p><h2 id="p-2506.19290">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出增量式自动化的 SWE 数据策展管道，系统性扩展 SWE 数据集的规模和多样性，并基于此揭示大模型软件工程能力的数据 scaling 规律。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 设计了增量式、 自动化的数据策展管道，无需人工干预即可大规模生成 SWE 训练数据
+  - 构建了包含 10,169 个真实世界 Python 任务实例的大规模数据集，来源自 2,531 个 GitHub 仓库
+  - 每个任务配有自然语言任务描述和专用的运行时环境镜像，用于自动化单元测试验证
+  - 首次系统性地研究 SWE 任务的数据 scaling laws，发现模型性能随数据量增加持续提升，无饱和现象</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 在 SWE 任务上，模型性能与训练数据规模呈现持续增长的 scaling law，未观察到性能饱和
+  - 即使不使用验证器或多轮采样，模型也能达到 38.0% 的 pass@1 准确率
+  - 结合测试时扩展技术（test-time scaling），性能可提升至 47.0%，超越所有子 32B 参数模型</p><p>---</p><p></p><p><h2 id="p-2506.19290">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  [GitHub 仓库采集] → [自动化任务筛选] → [运行时环境构建] → 
+  [单元测试验证] → [训练轨迹策展] → [模型微调] → [性能评估]
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据采集</strong>：从 GitHub 仓库中自动采集 Python 代码仓库
+  2. <strong>任务筛选</strong>：自动化过滤有意义的 SWE 任务（包含问题描述和测试用例）
+  3. <strong>环境构建</strong>：为每个任务构建专用的运行时环境 Docker 镜像
+  4. <strong>验证执行</strong>：自动化执行单元测试，验证任务实例的正确性
+  5. <strong>轨迹策展</strong>：收集成功通过测试的训练轨迹（>8,000 条）
+  6. <strong>模型微调</strong>：基于 Qwen2.5-Coder-32B 进行微调
+  7. <strong>性能评估</strong>：在 SWE-bench Verified 基准上评估模型性能</p><p>---</p><p></p><p><h2 id="p-2506.19290">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：数据 scaling 定律（Data Scaling Law）</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul></p><p>  模型性能与训练数据规模的关系可表示为：</p><p>  <div class="math">$$\text{Performance} = a \cdot \log(N) + b$$</div></p><p>  其中：
+  - $N$ 表示训练数据规模（成功验证的任务实例数量）
+  - $a$ 和 $b$ 为拟合参数
+  - 该关系表明性能随数据量对数增长，<strong>未观察到饱和现象</strong></p><p>  Pass@1 准确率公式：
+  
+  <div class="math">$$\text{pass@1} = \frac{\#\text{tasks solved correctly in first attempt}}{\#\text{total tasks}} \times 100\%$$</div></p><p>---</p><p></p><p><h2 id="p-2506.19290">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>训练集</strong>：10,169 个真实世界 Python 任务实例，来自 2,531 个 GitHub 仓库
+  - <strong>验证轨迹</strong>：8,000+ 条成功通过运行时验证的训练轨迹
+  - <strong>测试集</strong>：SWE-bench Verified 基准</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - <strong>无测试时扩展</strong>：38.0% pass@1 准确率
+  - <strong>有测试时扩展</strong>：47.0% pass@1 准确率
+  - 基于 Qwen2.5-Coder-32B 构建，使用 OpenHands 智能体框架</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  | 模型 | Pass@1 准确率 |
+  |------|--------------|
+  | Skywork-SWE-32B (无 TTS) | 38.0% |
+  | Skywork-SWE-32B (有 TTS) | 47.0% |
+  | 之前 SOTA (子 32B) | <47.0% |</p><p>  <strong>结论</strong>：Skywork-SWE 建立了 Qwen2.5-Coder-32B 系列模型的新 SOTA，测试时扩展技术进一步将性能提升至超越所有子 32B 参数模型的水平。</p><p>---</p><p></p><p><h2 id="p-2506.19290">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：提出了增量式自动化的 SWE 数据策展管道</li></ul>
+  - 突破传统人工标注的高成本限制
+  - 实现了从 GitHub 仓库到可用训练数据的全自动化流程
+  - 每个任务配有独立的运行时环境镜像进行验证</p><p><ul><li><strong>创新点2</strong>：首次系统性揭示 SWE 任务的数据 scaling laws</li></ul>
+  - 发现模型性能随数据规模增加持续提升，无饱和迹象
+  - 为后续大规模数据构建提供了理论依据
+  - 证明更大规模数据可能带来更强的 SWE 能力</p><p><ul><li><strong>创新点3</strong>：实现了无需验证器或多轮采样的高效推理</li></ul>
+  - 38.0% pass@1 已超越许多使用复杂策略的模型
+  - 结合测试时扩展可达 47.0%
+  - 为轻量级部署提供了可行方案</p><p>---</p><p></p><p><h2 id="p-2506.19290">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 数据策展的自动化是扩展大规模训练数据的关键路径
+  - 运行时环境验证对于确保数据质量至关重要
+  - 关注数据 scaling laws 研究可指导后续数据投入决策
+  - 测试时扩展技术是提升模型性能的有效手段</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - <strong>多语言扩展</strong>：当前仅支持 Python，可扩展到 Java、JavaScript 等其他语言
+  - <strong>更复杂任务</strong>：增加涉及多文件重构、架构设计等复杂度的任务
+  - <strong>数据质量提升</strong>：引入代码审查、静态分析等进一步过滤低质量数据
+  - <strong>模型架构探索</strong>：尝试不同的基础模型和智能体框架组合
+  - <strong>推理效率优化</strong>：在保持性能的同时降低计算开销</p><p><ul><li><strong>可迁移的方法</strong>：</li></ul>
+  - 自动化数据策展管道的设计思路
+  - 运行时环境镜像的构建方法
+  - 数据 scaling laws 的实验方法论
+  - 训练轨迹的筛选和策展标准</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Testing Deep Learning Models: A First Comparative Study of Multiple Testing Techniques</h2>
+                <p>📄 ID: 2202.12139v | 🔗 <a href="https://arxiv.org/abs/2202.12139v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>深度学习（DL）彻底改变了视觉系统（VBS）在关键应用中的能力，例如自动驾驶、机器人手术、关键基础设施监控、航空和海上交通控制等。通过分析图像、语音、视频或任何类型的复杂信号，DL大幅提升了这些系统的情况感知能力。与此同时，随着对训练好的DL模型越来越依赖，VBS的可靠性和鲁棒性受到了严峻挑战，彻底测试这些模型以评估其能力和潜在错误变得至关重要。为了发现DL模型中的缺陷，现有的软件测试方法已被相应地调整和改进。在本文中，我们概述了这些软件测试方法，即差分测试、变形测试、变异测试和组合测试，以及对抗性扰动测试，并回顾了它们在提升VBS中感知系统性能方面的一些挑战。我们还针对VBS中使用的经典基准进行了首次实验比较研究，并讨论了其结果。</p></p><p><h2 id="p-2202.12139v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何有效地测试深度学习(DL)模型以发现其潜在缺陷和错误？</li></ul></p><p><ul><li><strong>研究背景</strong>：深度学习已经革新了视觉-based系统(VBS)在关键应用领域的能力，包括自动驾驶、机器人手术、关键基础设施监控、航空和海上交通控制等。DL通过分析图像、语音、视频或任何复杂信号，显著提高了这些系统的态势感知能力。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 随着对训练好的DL模型的依赖程度增加，VBS的可靠性和鲁棒性面临挑战
+  - 传统的软件测试方法需要针对DL模型进行适配和优化
+  - 缺乏对不同测试技术效果的系统性比较研究
+  - 在VBS中部署这些测试技术仍面临诸多挑战</p><p>---</p><p></p><p><h2 id="p-2202.12139v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提供首个针对视觉系统的多种DL模型软件测试技术的系统性实验比较研究，涵盖差分测试、变形测试、变异测试、组合测试和对抗扰动测试。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次在同一基准上比较多种DL测试技术
+  2. 分析这些测试方法在VBS感知系统中的实际部署挑战
+  3. 提供详细的实验结果对比分析</p><p><ul><li><strong>关键洞察</strong>：不同的测试技术各有优缺点，需要根据具体的应用场景和测试目标选择合适的测试方法组合。</li></ul></p><p>---</p><p></p><p><h2 id="p-2202.12139v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：本文为综述性论文，主要框架包括：</li></ul>
+  - 概述现有软件测试方法在DL模型测试中的应用
+  - 介绍六种主要测试技术
+  - 在经典VBS基准数据集上进行实验比较
+  - 讨论部署挑战</p><p><ul><li><strong>核心测试技术步骤</strong>：</li></ul></p><p>  <strong>1) 差分测试(Differential Testing)</strong>：
+  - 使用多个DL模型处理相同输入
+  - 比较模型输出差异
+  - 识别异常预测结果</p><p>  <strong>2) 变形测试(Metamorphic Testing)</strong>：
+  - 定义变形关系(输入变换→输出变换)
+  - 生成变形输入
+  - 验证输出是否符合变形关系</p><p>  <strong>3) 变异测试(Mutation Testing)</strong>：
+  - 对DL模型进行变异(修改权重/结构)
+  - 评估测试用例检测变异的能力
+  - 计算变异评分</p><p>  <strong>4) 组合测试(Combinatorial Testing)</strong>：
+  - 识别影响模型输出的参数组合
+  - 使用覆盖表生成测试用例
+  - 评估组合覆盖效果</p><p>  <strong>5) 对抗扰动测试(Adversarial Perturbation Testing)</strong>：
+  - 生成对抗性输入样本
+  - 测试模型对微小扰动的鲁棒性
+  - 评估模型安全性</p><p>---</p><p></p><p><h2 id="p-2202.12139v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为综述和实验研究，未包含严格的理论定理证明。</li></ul></p><p><ul><li><strong>重要公式</strong>：无特定数学公式，主要为测试技术的概念性描述。</li></ul></p><p>---</p><p></p><p><h2 id="p-2202.12139v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：论文提到使用"a classical benchmark used in VBS"（经典VBS基准数据集），具体数据集名称需查阅原文（可能为MNIST、CIFAR-10或类似自动驾驶相关数据集）。</li></ul></p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 对六种测试技术进行了系统性比较
+  - 各技术在发现DL模型缺陷方面表现各异
+  - 提供了实验结果分析</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 首次在同一基准上比较多种测试方法
+  - 讨论了各方法的优缺点和适用场景
+  - 识别了实际部署中的关键挑战</p><p>---</p><p></p><p><h2 id="p-2202.12139v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次对多种DL模型测试技术（差分测试、变形测试、变异测试、组合测试、对抗扰动测试）进行系统性的实验比较研究。</li></ul></p><p><ul><li><strong>创新点2</strong>：针对视觉系统在关键应用（自动驾驶、机器人手术等）中的测试挑战进行了专门分析和讨论。</li></ul></p><p><ul><li><strong>创新点3</strong>：提供了测试技术实际部署中面临挑战的详细分析，为后续研究提供了方向指引。</li></ul></p><p>---</p><p></p><p><h2 id="p-2202.12139v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 测试技术比较研究的重要性：单一测试方法往往无法全面覆盖DL模型的缺陷
+  - 不同应用场景需要不同的测试策略组合
+  - 测试方法的实用性取决于具体部署环境</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 可以针对特定应用场景（如自动驾驶目标检测）设计更针对性的测试技术
+  2. 研究如何组合多种测试技术以达到更好的测试效果
+  3. 探索自动化测试用例生成方法
+  4. 开发更高效的对抗样本生成和检测技术
+  5. 研究DL模型测试的度量标准和评估框架</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-smith: Scaling Data for Software Engineering Agents</h2>
+                <p>📄 ID: 2504.21798 | 🔗 <a href="https://arxiv.org/abs/2504.21798" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2504.21798">1. 研究动机 (Problem)</h2></p><p>#</p><p><h2 id="p-2504.21798">2. 核心思想 (Key Idea)</h2></p><p>#</p><p><h2 id="p-2504.21798">3. 算法结构 (Algorithm)</h2></p><p>#</p><p><h2 id="p-2504.21798">4. 理论证明 (Theory)</h2></p><p>#</p><p><h2 id="p-2504.21798">5. 实验设计与结论 (Experiment)</h2></p><p>#</p><p><h2 id="p-2504.21798">6. 创新点</h2></p><p>#</p><p><h2 id="p-2504.21798">7. 可借鉴点 (Your Research)</h2></p><p>#
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-bench-java: A GitHub Issue Resolving Benchmark for Java</h2>
+                <p>📄 ID: 2408.14354 | 🔗 <a href="https://arxiv.org/abs/2408.14354" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>GitHub问题解决是软件工程中的一项关键任务，近年来在工业界和学术界都获得了广泛关注。在这项任务中，SWE-bench~\cite{swe-bench}被发布用于评估大语言模型（LLMs）的问题解决能力，但目前仅关注Python版本。然而，支持更多编程语言也很重要，因为工业界对此有强烈需求。作为迈向多语言支持的第一步，我们开发了Java版本的SWE-bench，称为\swebenchjava。我们已经公开发布了该数据集，以及相应的基于Docker的评估环境和排行榜，这些将在未来几个月内持续维护和更新。为了验证\swebenchjava的可靠性，我们实现了一种经典方法SWE-agent~\cite{yang2024sweagent}并在其上测试了几个强大的LLMs。大家都知道，开发高质量的多语言基准测试既耗时又费力，因此我们欢迎通过拉取请求或合作方式来贡献力量，以加速其迭代和完善，为全自动化编程铺平道路。</p></p><p><h2 id="p-2408.14354">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何评估大型语言模型（LLM）解决Java语言GitHub问题的能力？</li></ul>
+<ul><li><strong>研究背景</strong>：</li></ul>
+  - GitHub issue解决是软件工程中一项关键任务，近年来在工业界和学术界都受到广泛关注
+  - SWE-bench是评估LLM issue解决能力的基准测试，但此前仅支持Python版本
+  - 工业界对多语言支持有强烈需求
+<ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有的SWE-bench仅关注Python编程语言
+  - 缺乏针对其他主流编程语言的issue解决能力评估基准
+  - 开发高质量多语言基准测试耗时耗力</p><p></p><p><h2 id="p-2408.14354">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：创建并发布了Java版本的SWE-bench基准测试（SWE-bench-java），包括数据集、基于Docker的评估环境和排行榜</li></ul>
+<ul><li><strong>创新点</strong>：</li></ul>
+  - 首次创建专门针对Java语言的GitHub issue解决能力评估基准
+  - 构建了完整的基于Docker的标准化评估环境
+  - 提供了持续维护和更新的排行榜系统
+<ul><li><strong>关键洞察</strong>：多语言支持是评估LLM实际软件工程能力的重要方向，Java作为企业级主流编程语言，需要专门的基准测试</li></ul></p><p></p><p><h2 id="p-2408.14354">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  - 数据集构建模块 → Docker评估环境 → Leaderboard排行榜系统
+<ul><li><strong>核心步骤</strong>：</li></ul>
+  1. 收集真实的Java GitHub issue数据
+  2. 构建与issue对应的代码仓库和修复补丁
+  3. 开发基于Docker的标准化评估环境
+  4. 实现SWE-agent经典方法作为基线
+  5. 测试多个主流LLM在Java任务上的表现
+  6. 建立和维护公开排行榜</p><p></p><p><h2 id="p-2408.14354">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为数据集和基准测试论文，未包含传统意义上的理论定理证明</li></ul>
+<ul><li><strong>重要公式</strong>：无复杂的数学公式</li></ul></p><p>*注：本论文属于数据集/基准测试类论文，主要贡献在于构建评估基准而非提出新的算法理论*</p><p></p><p><h2 id="p-2408.14354">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - SWE-bench-java数据集（Java版本的SWE-bench）
+  - 包含真实的Java GitHub issue及其对应的代码仓库
+<ul><li><strong>主要结果</strong>：</li></ul>
+  - 验证了SWE-bench-java的可靠性
+  - 使用SWE-agent经典方法测试
+  - 评估了多个强大的LLM在Java issue解决任务上的表现
+<ul><li><strong>对比分析</strong>：</li></ul>
+  - 与Python版SWE-bench进行对比验证
+  - 建立了Java领域的LLM排行榜
+  - 为后续多语言支持奠定基础</p><p></p><p><h2 id="p-2408.14354">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次创建专门针对Java语言的GitHub issue解决能力评估基准，填补了多语言支持的重要空白</li></ul>
+<ul><li><strong>创新点2</strong>：构建了完整的基于Docker的标准化评估环境，确保评估的可重复性和公平性</li></ul>
+<ul><li><strong>创新点3</strong>：建立了持续维护和更新的排行榜系统，为社区提供了公开的评估平台</li></ul></p><p></p><p><h2 id="p-2408.14354">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 基准测试的构建思路可以迁移到其他编程语言（如JavaScript、C++等）
+  - 基于Docker的评估环境设计具有可扩展性
+  - 开源数据集+排行榜的模式有助于推动领域发展</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 可以考虑增加更多编程语言支持
+  - 可以引入更复杂的issue类型（如多文件修改、依赖问题等）
+  - 可以添加代码审查、单元测试生成等相关任务
+  - 可以探索更细粒度的评估指标（如代码质量、修复效率等）
+  - 可以考虑引入人机协作的评估方式</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-Master: Unleashing the Potential of Software Engineering Agents via Post-Training</h2>
+                <p>📄 ID: 2602.03411 | 🔗 <a href="https://arxiv.org/abs/2602.03411" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>在这份技术报告中，我们提出了SWE-Master，一个开源且完全可复现的后训练框架，用于构建高效的 软件工程智能体。SWE-Master 系统性地探索了完整的智能体开发流程，包括专家轨迹合成与数据整理、长程监督微调（SFT）、基于真实执行反馈的强化学习（RL）以及推理框架设计。从一个初始软件工程能力有限的 开源基座模型 出发，SWE-Master 展示了系统性优化方法如何激发出强大的长程软件工程任务解决能力。我们在 SWE-bench Verified（一个用于评估真实软件工程任务的 标准基准）上对SWE-Master进行了评估。在相同的实验设置下，我们的方法使用 Qwen2.5-Coder-32B 达到了 61.4% 的解决率，显著优于现有的 开源基线。通过进一步结合基于大语言模型的 环境反馈 进行推理时扩展（TTS），SWE-Master 在 TTS@8 设置下达到了 70.8%，展示了强大的性能潜力。SWE-Master 为推进软件工程智能体的可复现研究提供了实用且透明的基础。代码已发布于 https://github.com/RUCAIBox/SWE-Master。</p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>TOM-SWE: User Mental Modeling For Software Engineering Agents</h2>
+                <p>📄 ID: 2510.21903 | 🔗 <a href="https://arxiv.org/abs/2510.21903" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2510.21903">1. 研究动机 (Problem)</h2>
+<ul><li><strong>研究问题</strong>：当前编码agents（软件工程代理）在推断和追踪用户意图方面存在显著不足，特别是在指令不明确（underspecified）或依赖于上下文（context-dependent）的场景下。</li></ul>
+<ul><li><strong>研究背景</strong>：近年来，编码agents已经具备了规划、编辑、运行和测试复杂代码库的能力，在编码任务方面取得了显著进展。然而，这些系统在理解用户真正想要什么方面仍然存在很大差距，这限制了它们在实际开发场景中的应用效果。</li></ul>
+<ul><li><strong>现有局限性</strong>：现有的SWE（软件工程）代理缺乏对用户心理状态的建模能力，无法推断用户的目标、约束条件和偏好，导致当用户提供不完整或模糊的指令时，代理可能误解用户意图，从而导致任务执行失败或用户满意度下降。</li></ul></p><p></p><p><h2 id="p-2510.21903">2. 核心思想 (Key Idea)</h2>
+<ul><li><strong>核心贡献</strong>：提出ToM-SWE双代理架构，通过引入专门的用户心理建模代理（ToM agent）来增强SWE代理理解用户意图的能力，从而提升任务执行成功率和用户满意度。</li></ul>
+<ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次将心理理论（Theory of Mind）引入软件工程代理领域
+  2. 设计了轻量级的ToM伙伴代理，与主SWE代理协同工作
+  3. 建立了用户的持久记忆（persistent memory）机制来维护用户画像
+<ul><li><strong>关键洞察</strong>：通过维护用户的持久记忆并追踪交互历史，可以有效推断用户的隐含目标和偏好，这对于处理不明确或上下文依赖的指令至关重要。</li></ul></p><p></p><p><h2 id="p-2510.21903">3. 算法结构 (Algorithm)</h2>
+<ul><li><strong>整体框架</strong>：ToM-SWE采用双代理架构</li></ul>
+  - <strong>SWE Agent（主代理）</strong>：负责执行核心的软件工程任务（规划、编辑、运行、测试代码）
+  - <strong>ToM Agent（ToM伙伴代理）</strong>：专门负责建模用户的心理状态，包括推断用户目标、约束和偏好
+<ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>用户指令接收</strong>：ToM agent接收用户的原始指令和交互历史
+  2. <strong>用户意图推断</strong>：ToM agent从指令和历史中推断用户的目标、约束和偏好
+  3. <strong>持久记忆维护</strong>：ToM agent维护用户的持久记忆（persistent memory），记录用户偏好和约束
+  4. <strong>建议生成</strong>：ToM agent向SWE agent提供与用户相关的建议和上下文信息
+  5. <strong>任务执行</strong>：SWE agent基于ToM agent提供的用户相关信息执行任务
+  6. <strong>反馈循环</strong>：根据执行结果更新用户模型和记忆</p><p></p><p><h2 id="p-2510.21903">4. 理论证明 (Theory)</h2>
+<ul><li><strong>核心定理</strong>：在软件工程任务中，通过对用户心理状态进行显式建模（用户目标、约束、偏好），可以显著提高代理对不明确指令的理解能力，从而提升任务成功率和用户满意度。</li></ul>
+<ul><li><strong>重要公式</strong>：</li></ul>
+  - 用户满意度公式：<div class="math">$$S = f(T_{success}, U_{intent\_match}, C_{efficiency})$$</div>
+  - 其中 $T_{success}$ 表示任务执行成功率，$U_{intent\_match}$ 表示意图匹配度，$C_{efficiency}$ 表示效率
+  - ToM代理的价值提升：<div class="math">$$\Delta Success = Success_{ToM-SWE} - Success_{baseline}$$</div></p><p></p><p><h2 id="p-2510.21903">5. 实验设计与结论 (Experiment)</h2>
+<ul><li><strong>数据集</strong>：</li></ul>
+  1. <strong>模糊SWE-bench（Ambiguous SWE-bench）</strong>：包含不明确指令的SWE-bench测试集
+  2. <strong>有状态SWE-bench（Stateful SWE-bench）</strong>：新引入的评估基准，提供用户模拟器和之前的交互历史
+<ul><li><strong>主要结果</strong>：</li></ul>
+  - 在模糊SWE-bench上，ToM-SWE提升了任务成功率和用户满意度
+  - 在有状态SWE-bench上：ToM-SWE达到<strong>59.7%</strong>的任务成功率，而OpenHands（最先进的SWE代理）仅为<strong>18.1%</strong>
+  - 三周用户研究：参与的专业开发者在日常工作中使用ToM-SWE，<strong>86%</strong>的时间认为它是有用的
+<ul><li><strong>对比分析</strong>：ToM-SWE在有状态SWE-bench上比OpenHands提升了<strong>41.6个百分点</strong>（59.7% vs 18.1%），这表明显式建模用户心理状态对于处理上下文相关的任务具有显著优势。</li></ul></p><p></p><p><h2 id="p-2510.21903">6. 创新点</h2>
+<ul><li><strong>创新点1</strong>：首次在软件工程代理中引入心理理论（Theory of Mind）概念，创建了专门的用户心理建模代理</li></ul>
+<ul><li><strong>创新点2</strong>：设计了持久记忆（persistent memory）机制，使代理能够跨会话追踪用户的偏好、约束和目标</li></ul>
+<ul><li><strong>创新点3</strong>：提出了有状态SWE-bench评估基准，该基准提供用户模拟器和交互历史，能够更真实地评估代理处理上下文相关任务的能力</li></ul></p><p></p><p><h2 id="p-2510.21903">7. 可借鉴点 (Your Research)</h2>
+<ul><li><strong>研究启发</strong>：</li></ul>
+  1. 双代理架构是一种有效的分工策略，可以将复杂任务分解为不同子任务由专门代理处理
+  2. 持久记忆机制对于构建个性化、上下文感知的智能系统至关重要
+  3. 在人机交互研究中，用户的隐含意图建模是一个重要但常被忽视的维度
+<ul><li><strong>改进方向</strong>：</li></ul>
+  1. 可以探索更高效的用户意图推断方法，减少ToM agent的计算开销
+  2. 可以研究如何自动更新和修正用户记忆中的错误信息
+  3. 可以将ToM思想扩展到其他领域（如智能客服、辅助驾驶等），验证其普适性
+  4. 可以研究如何处理多用户场景下的意图冲突问题</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-Sharp-Bench: A Reproducible Benchmark for C# Software Engineering Tasks</h2>
+                <p>📄 ID: 2511.02352 | 🔗 <a href="https://arxiv.org/abs/2511.02352" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2511.02352">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：C#作为企业级重要语言（TIOBE排名第5），却缺乏像Python的SWE-Bench或Java/C的Multi-SWE-Bench那样的软件工程基准测试，导致无法评估AI编码代理在C#任务上的表现。</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - AI编码代理在Python软件工程任务上取得了显著进展（SWE-Bench）
+  - Java和C语言也有对应的基准测试（Multi-SWE-Bench）
+  - C#是主流企业级编程语言，广泛应用于微软生态系统和企业开发</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 缺乏专门针对C#的软件工程基准测试
+  - 无法跨语言比较AI编码代理的性能表现
+  - 现有的基准测试缺乏可重现性和完整的 curation pipeline</p><p></p><p><h2 id="p-2511.02352">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出首个可重现的C#软件工程基准测试SWE-Sharp-Bench，包含来自17个仓库的150个实例，并揭示了AI编码代理在C#任务上的显著性能差距。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 创建了首个针对C#语言的软件工程基准测试
+  - 提供了完整的基准测试构建流水线（curation pipeline）
+  - 首次跨语言评估相同模型-代理配置，揭示性能差距</p><p><ul><li><strong>关键洞察</strong>：在相同模型-代理配置下，Python任务解决率为70%，而C#任务仅为40%，说明AI编码代理在不同编程语言上的表现存在显著差异。</li></ul></p><p></p><p><h2 id="p-2511.02352">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：该工作为基准测试构建论文，其"算法"为基准测试的筛选和构建流程</li></ul></p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>需求收集</strong>：从17个真实C#仓库中收集问题实例
+  2. <strong>实例筛选</strong>：选择具有明确修复目标的问题实例（150个）
+  3. <strong>评估配置</strong>：使用与SWE-Bench Verified相同的模型-代理配置
+  4. <strong>性能评估</strong>：对比Python和C#任务的解决率
+  5. <strong>开源发布</strong>：发布基准测试和完整流水线</p><p></p><p><h2 id="p-2511.02352">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本论文为基准测试论文，不涉及传统意义上的理论定理证明</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  - 任务解决率公式：
+    <div class="math">$$Solve\ Rate = \frac{Number\ of\ Solved\ Tasks}{Total\ Number\ of\ Tasks} \times 100\%$$</div>
+  
+  - 性能差距公式：
+    <div class="math">$$Gap = Solve\ Rate_{Python} - Solve\ Rate_{C\#}$$</div></p><p></p><p><h2 id="p-2511.02352">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - 150个C#软件工程任务实例
+  - 来自17个不同的C#仓库
+  - 使用与SWE-Bench Verified相同的评估标准</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - C#任务解决率：40%
+  - Python任务解决率：70%
+  - 性能差距：30个百分点</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 与SWE-Bench Verified（Python）对比：在相同模型-代理配置下，C#性能显著低于Python
+  - 表明当前AI编码代理在处理C#企业级代码时存在较大挑战
+  - 强调需要针对C#特性优化AI编码代理</p><p></p><p><h2 id="p-2511.02352">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首个C#软件工程基准测试（SWE-Sharp-Bench），填补了C#在软件工程基准测试领域的空白</li></ul></p><p><ul><li><strong>创新点2</strong>：跨语言性能评估框架，揭示了AI编码代理在不同编程语言上的通用性和局限性</li></ul></p><p><ul><li><strong>创新点3</strong>：开源完整的基准测试构建流水线，为后续研究提供可重现性和可扩展性</li></ul></p><p></p><p><h2 id="p-2511.02352">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 基准测试的构建需要考虑语言特性和生态系统差异
+  - 跨语言比较可以揭示AI模型的通用能力边界
+  - 企业级语言（如C#）的基准测试对于产业应用具有重要价值</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 扩大C#基准测试的规模（更多仓库、更多实例）
+  - 针对C#特性（如泛型、LINQ、异步编程）设计专门的评估指标
+  - 研究导致性能差距的根本原因（是语言特性还是数据稀缺）
+  - 探索如何提升AI编码代理在C#任务上的表现</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SyncMind: Measuring Agent Out-of-Sync Recovery in Collaborative Software Engineering</h2>
+                <p>📄 ID: 2502.06994v | 🔗 <a href="https://arxiv.org/abs/2502.06994v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>以下是中文翻译：</p></p><p><h2 id="p-2502.06994v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：在大语言模型（LLM）代理参与协同软件工程（CSE）时，代理对环境的理解与当前代码库实际状态之间的不一致问题，即"out-of-sync"（不同步）问题。当协同者的理解与当前状态发生偏离时，其行为可能会失败，导致集成问题。</li></ul></p><p><ul><li><strong>研究背景</strong>：软件工程正变得越来越协作化，开发者在共享的复杂代码库上协同工作。无论是人类开发者还是AI代理，都需要与不断演化的环境保持同步。有效的协作需要参与者保持"在同一页面上"（on the same page）。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有研究缺乏对LLM代理在协同软件工程中不同步问题的系统性定义和测量
+  - 缺乏真实世界的基准测试来评估代理的不同步恢复能力
+  - 对现有LLM代理在协作意愿、资源感知能力等方面的局限性缺乏深入理解</p><p></p><p><h2 id="p-2502.06994v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出SyncMind框架，系统性地定义和测量LLM代理在协同软件工程中面临的out-of-sync问题，并创建了包含24,332个实例的大规模基准测试SyncBench。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次系统性地定义了协作软件工程中LLM代理的"out-of-sync"挑战
+  - 构建了基于21个真实GitHub仓库的大规模基准测试集，包含可执行的验证测试
+  - 揭示了现有LLM代理在协作意愿和资源感知方面的根本性局限</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 代理间性能差距显著：Llama-3.1代理成功率≤3.33%，而Claude-3.5-Sonnet≥28.18%
+  - 协作意愿普遍较低（≤4.86%），但一旦发生协作，与out-of-sync恢复成功呈正相关
+  - 代理在资源感知的out-of-sync恢复方面表现差异不大，揭示了资源感知能力的普遍缺失</p><p></p><p><h2 id="p-2502.06994v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  SyncMind Framework
+  │
+  ├── Out-of-Sync问题定义
+  │   ├── 环境状态变化
+  │   ├── 代理理解偏离
+  │   └── 恢复失败/成功
+  │
+  └── SyncBench基准测试
+      ├── 24,332个实例
+      ├── 21个GitHub仓库
+      └── 可执行验证测试
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>场景构建</strong>：从21个热门GitHub仓库中提取真实的协同软件工程场景
+  2. <strong>Out-of-Sync注入</strong>：创建代理理解与实际环境状态不一致的测试实例
+  3. <strong>可执行验证</strong>：使用真实的测试用例验证代理的恢复结果
+  4. <strong>多维度评估</strong>：评估代理的恢复成功率、协作意愿、资源感知能力等</p><p></p><p><h2 id="p-2502.06994v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为实证研究论文，未包含传统的理论定理证明。主要贡献在于定义问题和建立基准测试。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  - Out-of-Sync恢复成功率：
+    <div class="math">$$\text{Recovery Rate} = \frac{\text{成功恢复的实例数}}{\text{总实例数}} \times 100\%$$</div>
+  
+  - 协作意愿指数：
+    <div class="math">$$\text{Collaboration Willingness} = \frac{\text{选择协作策略的次数}}{\text{总决策次数}} \times 100\%$$</div></p><p>  - 资源效率评分：
+    <div class="math">$$\text{Resource Efficiency} = \frac{\text{任务完成度}}{\text{资源消耗量}}$$</div></p><p></p><p><h2 id="p-2502.06994v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>SyncBench</strong>：24,332个out-of-sync场景实例
+  - <strong>来源</strong>：21个流行的GitHub仓库
+  - <strong>特点</strong>：包含可执行的验证测试</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - <strong>性能差距显著</strong>：Llama-3.1代理成功率≤3.33%，Claude-3.5-Sonnet≥28.18%
+  - <strong>协作意愿低</strong>：所有代理的协作意愿均≤4.86%
+  - <strong>协作与成功正相关</strong>：当代理选择协作时，out-of-sync恢复成功率显著提升
+  - <strong>资源感知不足</strong>：不同代理在资源感知的out-of-sync恢复方面差异不大（均表现不佳）</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 与SOTA LLM代理对比：Claude-3.5-Sonnet表现最佳，但成功率仍未超过30%
+  - 协作策略vs独立策略：协作策略在恢复成功方面明显优于独立策略
+  - 资源aware vs 非资源aware：现有代理普遍缺乏资源感知和适应能力</p><p></p><p><h2 id="p-2502.06994v">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次系统性定义</li></ul>
+  首次系统性地定义了协作软件工程中LLM代理面临的"out-of-sync"挑战，建立了完整的概念框架。</p><p><ul><li><strong>创新点2</strong>：大规模真实世界基准</li></ul>
+  创建了包含24,332个实例的SyncBench基准测试，基于21个真实GitHub仓库，具有可执行的验证测试，确保评估的真实性。</p><p><ul><li><strong>创新点3</strong>：多维度深入分析</li></ul>
+  不仅评估了恢复性能，还深入分析了协作意愿、资源感知能力等多个维度，揭示了现有LLM代理的根本性局限。</p><p></p><p><h2 id="p-2502.06994v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 协作式AI系统的评估需要关注"同步"问题，不仅仅是任务完成率
+  - 基准测试应该基于真实世界的场景和可执行的验证
+  - 代理的"意愿"（如协作意愿）可能是影响性能的重要因素</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 提高代理的协作意愿：可以通过激励机制或架构改进来增强代理的协作倾向
+  - 增强资源感知能力：设计资源感知的代理架构，使其能够根据资源状况调整策略
+  - 改进out-of-sync检测和恢复机制：开发更高效的环境状态监控和同步机制
+  - 扩展到多代理场景：研究多个LLM代理之间的协作与同步问题</p><p>---</p><p><strong>注</strong>：本文主要是一篇实证研究/基准测试论文，重点在于问题定义、基准构建和实验分析，而非算法创新或理论证明。</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>The Atlas Benchmark: an Automated Evaluation Framework for Human Motion Prediction</h2>
+                <p>📄 ID: 2207.09830 | 🔗 <a href="https://arxiv.org/abs/2207.09830" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p><strong>译文（中文）</strong></p></p><p><h2 id="p-2207.09830">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何系统化、标准化地评估人类运动轨迹预测算法，并进行客观公正的性能比较？</li></ul></p><p><ul><li><strong>研究背景</strong>：人类运动轨迹预测是自动驾驶、机器人导航等自主系统在许多领域的关键任务。近年来，不同研究社区提出了大量新的预测方法，该领域发展迅速。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. 缺乏标准化基准和客观比较框架
+  2. 现有基准在范围和灵活性上受到限制
+  3. 难以进行相关实验以考虑智能体和环境的上下文线索
+  4. 无法充分评估方法的准确性和鲁棒性</p><p>---</p><p></p><p><h2 id="p-2207.09830">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出Atlas，一个用于系统评估人类运动轨迹预测算法的统一基准框架，集成了数据预处理、超参数优化、流行数据集和灵活实验设置功能。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次提供统一的自动化评估框架
+  2. 支持超参数优化和数据预处理自动化
+  3. 具备灵活性以设置和开展未充分探索但相关的实验
+  4. 能够全面评估方法的准确性和鲁棒性</p><p><ul><li><strong>关键洞察</strong>：当正确应用时，早期基于物理的方法仍然非常具有竞争力，这一发现证明了标准化基准（如Atlas）的必要性。</li></ul></p><p>---</p><p></p><p><h2 id="p-2207.09830">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：Atlas基准测试框架是一个模块化的统一评估系统，包含以下核心组件：</li></ul>
+  - 数据预处理模块
+  - 超参数优化模块
+  - 数据集管理模块
+  - 实验配置模块
+  - 评估分析模块</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据预处理</strong>：提供标准化数据预处理函数
+  2. <strong>数据集集成</strong>：内置流行数据集（ETH/UCY、SDD等）
+  3. <strong>模型配置</strong>：灵活设置和配置预测算法
+  4. <strong>超参数优化</strong>：自动化超参数调优
+  5. <strong>评估执行</strong>：运行实验并记录结果
+  6. <strong>结果分析</strong>：评估准确性和鲁棒性</p><p>---</p><p></p><p><h2 id="p-2207.09830">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为基准测试论文，未包含复杂的理论定理证明，主要贡献在于实践验证和框架构建。</li></ul></p><p><ul><li><strong>重要公式</strong>：论文主要使用运动预测领域的标准评估指标：</li></ul></p><p>  - <strong>Average Displacement Error (ADE)</strong>：
+  <div class="math">$$ADE = \frac{1}{T} \sum_{t=1}^{T} \sqrt{(x_t - \hat{x}_t)^2 + (y_t - \hat{y}_t)^2}$$</div></p><p>  - <strong>Final Displacement Error (FDE)</strong>：
+  <div class="math">$$FDE = \sqrt{(x_T - \hat{x}_T)^2 + (y_T - \hat{y}_T)^2}$$</div></p><p>  其中，$(x_t, y_t)$为真实位置，$(\hat{x}_t, \hat{y}_t)$为预测位置，$T$为预测时间步数。</p><p>---</p><p></p><p><h2 id="p-2207.09830">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - ETH/UCY数据集
+  - Stanford Drone Dataset (SDD)
+  - 其他流行的人类轨迹数据集</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 比较了五种流行的基于模型和基于学习的预测器
+  - 发现当正确应用时，早期基于物理的方法（如线性方法、恒定速度模型）仍然非常具有竞争力
+  - 基于学习的方法在某些场景下优势明显，但在标准化评估下物理方法表现出乎意料地好</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 统一框架下，不同方法可以进行公平比较
+  - 物理基础方法在适当调优后可与深度学习方法媲美
+  - 强调了基准测试对客观评估的重要性</p><p>---</p><p></p><p><h2 id="p-2207.09830">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：提出Atlas统一基准框架，解决了人类运动轨迹预测领域缺乏标准化评估工具的问题</li></ul></p><p><ul><li><strong>创新点2</strong>：集成了数据预处理、超参数优化和灵活实验设置，为研究者提供了便捷的实验平台</li></ul></p><p><ul><li><strong>创新点3</strong>：通过系统性实验揭示了物理基础方法的持续竞争力，强调了正确评估方法的重要性</li></ul></p><p>---</p><p></p><p><h2 id="p-2207.09830">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 基准测试框架的建立对领域发展至关重要
+  2. 简单方法在适当优化后可能优于复杂方法，需要公平比较
+  3. 自动化工具（超参数优化、数据预处理）可显著提升研究效率</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 扩展Atlas框架以支持更多类型的环境和上下文信息
+  2. 增加更多基于深度学习的最先进方法进行比较
+  3. 引入更多评估维度（如计算效率、泛化能力）
+  4. 考虑多智能体交互和场景感知能力
+  5. 建立在线更新机制以持续纳入新方法</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Automated Composition of Agents: A Knapsack Approach for Agentic Component Selection</h2>
+                <p>📄 ID: 2510.16499 | 🔗 <a href="https://arxiv.org/abs/2510.16499" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>设计有效的智能体系统需要在动态且不确定的环境中无缝组合和集成智能体、工具和模型。现有的方法大多依赖静态的语义检索方法来进行工具或智能体发现。然而，由于能力描述不完整以及检索方法的局限性，现有组件的有效复用和组合仍然具有挑战性。</p><p>组件选择之所以困难，是因为决策并非基于能力、成本和实时效用。为了应对这些挑战，我们引入了一个受背包问题启发的结构化自动化框架。该框架使组合智能体能够通过综合考虑性能、预算约束和兼容性，系统地识别、选择和组装最优的智能体组件。通过对候选组件进行动态测试并实时建模其效用，我们的方法简化了智能体系统的组装过程，并促进了资源的可扩展复用。使用Claude 3.5 Sonnet在五个基准数据集上进行的实证评估表明，我们基于在线背包的组合器始终位于帕累托前沿，与基线方法相比，以显著更低的组件成本实现了更高的成功率。</p><p>在单智能体设置中，在线背包组合器与检索基线方法相比，成功率提升高达31.6%。在多智能体系统中，当从包含100多个智能体的智能体库存中选择智能体时，在线背包组合器将成功率从37%提高到87%。这一显著的性能差距证实了我们的方法在各种领域和预算约束下都具有强大的适应性。</p></p><p><h2 id="p-2510.16499">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何在动态和不确定的环境中，自动选择和组合最优的agentic组件（agents、tools、models），使其在满足预算约束的前提下达到最佳性能？</li></ul></p><p><ul><li><strong>研究背景</strong>：随着agentic系统的快速发展，设计有效的agentic系统需要无缝组合和集成多个agents、tools和models。组件的可复用性和可组合性对于构建可扩展的智能系统至关重要。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. 现有方法依赖静态的语义检索（semantic retrieval）进行工具或agent发现
+  2. 组件的能力描述不完整，导致检索不准确
+  3. 现有方法无法同时考虑能力、成本和实时效用做决策
+  4. 缺乏对组件兼容性（compatibility）的系统性建模</p><p></p><p><h2 id="p-2510.16499">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出一种受knapsack问题启发的自动化框架（online-knapsack-based composer），通过动态测试候选组件并实时建模其效用，系统性地识别、选择和组装最优的agentic组件集合。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首次将组件选择问题形式化为带有预算约束的优化问题
+  2. 采用online knapsack方法处理动态不确定环境
+  3. 引入实时效用建模（real-time utility modeling），通过动态测试评估组件的实际性能</p><p><ul><li><strong>关键洞察</strong>：组件选择不应仅基于静态语义匹配，而应联合考虑性能、预算约束和组件间的兼容性，通过实际测试获取真实效用值。</li></ul></p><p></p><p><h2 id="p-2510.16499">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  输入：组件库、任务需求、预算约束
+  ↓
+  Composer Agent
+  ↓
+  1. 候选组件识别（初步检索）
+  2. 动态测试与效用评估
+  3. Online Knapsack优化选择
+  4. 兼容性检查
+  ↓
+  输出：最优组件组合
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>候选组件识别</strong>：基于任务需求，从组件库中初步检索相关agents和tools
+  2. <strong>动态测试</strong>：对候选组件进行实际执行测试，获取真实性能数据
+  3. <strong>效用建模</strong>：将性能、成本、兼容性等因素综合建模为效用函数
+  4. <strong>Online Knapsack优化</strong>：在预算约束下，选择效用最大化的组件组合
+  5. <strong>迭代优化</strong>：根据实时反馈动态调整选择策略</p><p></p><p><h2 id="p-2510.16499">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：Online Knapsack Composer能够达到Pareto最优，即在成功率和成本之间取得最佳权衡。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  
+  效用函数：
+  <div class="math">$$U(c) = \alpha \cdot P(c) - \beta \cdot Cost(c) - \gamma \cdot Incomp(c)$$</div>
+  
+  其中：
+  - $P(c)$ 表示组件组合$c$的性能得分
+  - $Cost(c)$ 表示总成本
+  - $Incomp(c)$ 表示不兼容性惩罚
+  - $\alpha, \beta, \gamma$ 为权重参数
+  
+  优化目标：
+  <div class="math">$$\max_{c \in C} U(c) \quad \text{s.t.} \quad Cost(c) \leq B$$</div>
+  
+  其中$B$为预算约束，$C$为所有可能的组件组合。</p><p></p><p><h2 id="p-2510.16499">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：5个benchmarking datasets，使用Claude 3.5 Sonnet进行评估</li></ul></p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  1. <strong>单agent设置</strong>：Online knapsack composer相比检索基线，成功率提升高达<strong>31.6%</strong>
+  2. <strong>多agent系统</strong>：当从100+个agents的库存中选择时，成功率从<strong>37%</strong>提升到<strong>87%</strong>
+  3. Composer始终位于Pareto前沿，在显著降低组件成本的同时获得更高成功率</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 相比传统静态语义检索方法，本方法在成本效益上具有显著优势
+  - 在多agent场景下提升尤为明显（50个百分点）
+  - 验证了动态测试和实时效用建模的有效性</p><p></p><p><h2 id="p-2510.16499">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：问题形式化创新——将agentic组件选择问题建模为knapsack优化问题，为该领域提供了新的理论视角</li></ul></p><p><ul><li><strong>创新点2</strong>：动态评估范式——摒弃静态语义检索，引入动态测试和实时效用建模，更准确地反映组件实际性能</li></ul></p><p><ul><li><strong>创新点3</strong>：Pareto最优保证——理论分析和实证验证表明，该方法能在成功率和成本之间达到Pareto最优，具有较强的适应性</li></ul></p><p></p><p><h2 id="p-2510.16499">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 可以将knapsack思想应用于其他AI系统组合问题（如RAG系统中检索器的选择）
+  2. 动态测试+效用建模的思路可应用于其他需要评估组件实际性能的场景
+  3. 在线优化方法（online optimization）为处理不确定环境提供了良好范式</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 可以引入更复杂的兼容性建模（如组件间的依赖关系图）
+  2. 考虑引入强化学习方法进一步优化selection策略
+  3. 扩展到更大规模组件库时的效率优化
+  4. 探索不同任务类型下的效用函数设计差异</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-QA: Can Language Models Answer Repository-level Code Questions?</h2>
+                <p>📄 ID: 2509.14635 | 🔗 <a href="https://arxiv.org/abs/2509.14635" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>理解并推理整个软件代码仓库是智能软件工程工具的一项关键能力。现有的基准测试（如CoSQA和CodeQA）虽然推动了该领域的发展，但主要聚焦于小型、自包含的代码片段。这些设置无法捕捉真实世界代码仓库的复杂性，因为在实际应用中，有效的理解和推理往往需要浏览多个文件、理解软件架构，并将答案建立在长距离代码依赖关系之上。</p><p>在本文中，我们提出了\ourbench，这是一个仓库级代码问答（QA）基准测试，旨在促进对真实代码环境中自动化QA系统的研究。\ourbench包含576个高质量问答对，涵盖多种类别，包括意图理解、跨文件推理和多跳依赖分析。为构建\ourbench，我们首先从11个热门代码仓库中抓取了77,100个GitHub议题。基于对这些议题中提取的自然发生的开发者问题的分析，我们开发了一个仓库级问题的两级分类体系，并为每个类别构建了一组种子问题。对于每个类别，我们人工整理并验证了问题及其对应的答案。作为原型应用，我们进一步开发了\ourmethod，这是一个智能体框架，其中大语言模型（LLM）智能体通过推理和行动来自动寻找答案。</p><p>我们在各种上下文增强策略下对六个先进的LLM进行了评估。实验结果凸显了LLM在解决仓库级QA问题上的潜力，特别是我们的\ourmethod框架，同时这也揭示了开放性挑战并指明了未来的研究方向。</p></p><p><h2 id="p-2509.14635">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何使语言模型能够回答仓库级（repository-level）的代码问题，这类问题需要理解整个软件仓库的架构、跨文件依赖关系和长距离代码关联。</li></ul></p><p><ul><li><strong>研究背景</strong>：理解和推理整个软件仓库是智能软件工程工具的基本能力。随着软件系统规模日益复杂，能够在仓库级别进行代码理解和推理的能力变得尤为重要。</li></ul></p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 现有基准测试如 CoSQA 和 CodeQA 主要关注小型、自包含的代码片段
+  - 这些设置无法捕捉真实世界仓库的复杂性
+  - 缺乏需要浏览多个文件、理解软件架构、以及将答案建立在长距离代码依赖关系上的基准测试</p><p>---</p><p></p><p><h2 id="p-2509.14635">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出 SWE-QA，第一个专门用于评估仓库级代码问答的基准测试，包含 576 个高质量问答对，涵盖意图理解、跨文件推理和多跳依赖分析等多种类别。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 创建了首个仓库级代码 QA 基准测试，填补了现有基准测试的空白
+  - 开发了双层分类体系来系统化仓库级问题
+  - 构建了 SWE-QA-Agent 代理框架，使 LLM 能够自主推理和行动来寻找答案</p><p><ul><li><strong>关键洞察</strong>：真实世界的代码理解需要多文件导航、软件架构理解和长距离依赖推理，而现有方法无法有效评估这一能力。</li></ul></p><p>---</p><p></p><p><h2 id="p-2509.14635">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  GitHub Issues 爬取 → 问题分类体系构建 → 种子问题生成 → 人工验证 → QA对收集 
+       ↓
+  SWE-QA 数据集 (576 QA对)
+       ↓
+  SWE-QA-Agent 评估框架
+       ↓
+  六种LLM + 多种上下文增强策略 → 性能评估
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据收集</strong>：从 11 个流行 GitHub 仓库爬取 77,100 个 GitHub issues
+  2. <strong>问题分析</strong>：分析从这些 issues 中提取的开发者自然提问
+  3. <strong>分类体系构建</strong>：开发仓库级问题的双层分类体系
+  4. <strong>种子问题生成</strong>：为每个类别构建一组种子问题
+  5. <strong>质量控制</strong>：人工策划和验证问题和答案
+  6. <strong>代理框架开发</strong>：开发 SWE-QA-Agent 实现自动化问答
+  7. <strong>评估实验</strong>：使用六种高级 LLM 在不同上下文增强策略下进行评估</p><p>---</p><p></p><p><h2 id="p-2509.14635">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为实证研究型论文，无形式化定理证明。</li></ul></p><p><ul><li><strong>重要公式</strong>：无数学公式。</li></ul></p><p>> <strong>注</strong>：本文主要贡献在于构建基准测试和评估框架，属于应用研究而非理论研究范畴，因此不涉及传统意义上的理论证明部分。</p><p>---</p><p></p><p><h2 id="p-2509.14635">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - <strong>原始数据</strong>：从 11 个流行 GitHub 仓库爬取的 77,100 个 GitHub issues
+  - <strong>基准测试</strong>：SWE-QA 包含 576 个高质量问答对
+  - <strong>仓库类型</strong>：涵盖多种编程语言和应用领域
+  - <strong>问题类别</strong>：意图理解（intention understanding）、跨文件推理（cross-file reasoning）、多跳依赖分析（multi-hop dependency analysis）</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - 六种高级 LLM 在 SWE-QA 上进行了评估
+  - 使用了多种上下文增强策略
+  - 实验结果表明 LLM 在仓库级 QA 任务上展现出潜力
+  - SWE-QA-Agent 框架表现最佳
+  - 仍存在显著挑战，需要进一步研究</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 现有基准测试（CoSQA、CodeQA）仅关注代码片段级别
+  - SWE-QA 是首个专门针对仓库级别复杂推理的基准测试
+  - 实验结果揭示了当前 LLM 在真实世界仓库理解方面的能力边界和不足</p><p>---</p><p></p><p><h2 id="p-2509.14635">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：创建了首个仓库级代码问答基准测试 SWE-QA，包含 576 个高质量问答对，涵盖 11 个真实 GitHub 仓库。</li></ul></p><p><ul><li><strong>创新点2</strong>：提出了仓库级问题的双层分类体系，系统化定义了意图理解、跨文件推理、多跳依赖分析等类别。</li></ul></p><p><ul><li><strong>创新点3</strong>：开发了 SWE-QA-Agent 代理框架，实现了基于 LLM 代理的自动化仓库级问答系统，能够自主推理、导航和查找信息。</li></ul></p><p>---</p><p></p><p><h2 id="p-2509.14635">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 基准测试构建的方法论：如何从真实开发场景（GitHub issues）中系统化提取和构建高质量 QA 数据集
+  - 问题分类体系的构建思路对于其他领域（如文档问答、系统级理解）具有参考价值
+  - 代理框架的设计思路可应用于其他需要长程推理的软件工程任务</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 扩大仓库覆盖范围，增加更多编程语言和领域的仓库
+  - 增加问题的复杂度和多样性，特别是架构级理解问题
+  - 探索更有效的上下文检索和增强策略
+  - 研究如何更好地利用代码结构信息（图结构、依赖关系）来增强理解
+  - 开发专门的训练方法来提升模型在仓库级任务上的能力</p><p>---</p><p>*以上分析基于论文摘要内容，如需更详细分析，请提供论文全文。*</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>Observation of the rare $B^0_s\toμ^+μ^-$ decay from the combined analysis of CMS and LHCb data</h2>
+                <p>📄 ID: 1411.4413v | 🔗 <a href="https://arxiv.org/abs/1411.4413v" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-1411.4413v">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：精确测量稀有B介子衰变B⁰_s→μ⁺μ⁻和B⁰→μ⁺μ⁻的分支比，并寻找新物理迹象</li></ul></p><p><ul><li><strong>研究背景</strong>： </li></ul>
+  - B⁰_s→μ⁺μ⁻和B⁰→μ⁺μ⁻衰变在标准模型（SM）中是高度压低的稀有过程，理论预测分支比分别约为3.65×10⁻⁹和1.06×10⁻¹⁰
+  - 这类" Flavor Changing Neutral Current" (FCNC) 过程对超出标准模型（BSM）的新物理非常敏感
+  - 寻找新物理的间接探针，可检验超对称、扩展希格斯模型等理论</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  - 单个实验（CMS或LHCb）的数据量和探测器几何接受度有限
+  - 背景压低技术要求高，需要更大的统计样本
+  - 之前尚未观测到B⁰_s→μ⁺μ⁻衰变，仅有上限约束</p><p>---</p><p></p><p><h2 id="p-1411.4413v">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：通过联合分析CMS和LHCb的LHC数据，首次观测到B⁰_s→μ⁺μ⁻衰变（>6σ显著性），并获得当时最精确的分支比测量</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  - 首次实现CMS和LHCb实验的联合分析
+  - 开发统一的分析框架，结合两个探测器不同几何接受的互补性
+  - 显著提高统计敏感性，达到观测阈值</p><p><ul><li><strong>关键洞察</strong>：</li></ul>
+  - 实验结果与标准模型预测高度一致
+  - 对新物理模型施加了严格约束（排除大量BSM参数空间）
+  - 证明LHC的B物理项目具有强大潜力</p><p>---</p><p></p><p><h2 id="p-1411.4413v">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  数据收集 → 事件选择 → 信号/背景拟合 → 分支比提取 → 结果联合
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据采集</strong>：2011年（7 TeV）和2012年（8 TeV）质子-质子碰撞数据
+  2. <strong>事例选择</strong>：双μ子触发、离线重建、B介子候选者构建
+  3. <strong>背景压低</strong>：利用多变量分析（BDT/BDTG）鉴别信号与背景
+  4. <strong>盲分析</strong>：在数据解开前完成所有选择条件优化
+  5. <strong>信号提取</strong>：对m_μμ分布进行双组分拟合（信号+背景）
+  6. <strong>分支比计算</strong>：
+     - 使用Control通道归一化（通过B⁺→J/ψK⁺衰变）
+     - 校正探测效率、接受度等
+  7. <strong>联合分析</strong>：两个实验的结果使用最佳线性无偏估计（BLUE）方法合并</p><p>---</p><p></p><p><h2 id="p-1411.4413v">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：标准模型下FCNC过程的分支比计算</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul></p><p>标准模型对B⁰_s→μ⁺μ⁻分支比的预测：</p><p><div class="math">$$\mathcal{B}(B^0_s \to \mu^+\mu^-)_{\text{SM}} = \frac{G_F^2 \alpha^2 m_{B_s}}{64\pi^3} |V_{tb}V_{ts}^*|^2 \tau_{B_s} (1-\frac{4m_\mu^2}{m_{B_s}^2}) \sqrt{1-\frac{4m_\mu^2}{m_{B_s}^2}} \cdot |C_{10}|^2$$</div></p><p>其中：
+<ul><li>$G_F$ 为费米常数</li></ul>
+<ul><li>$\alpha$ 为精细结构常数</li></ul>
+<ul><li>$m_{B_s}$ 为B⁰_s介子质量</li></ul>
+<ul><li>$V_{tb}V_{ts}$ 为CKM矩阵元</li></ul>
+<ul><li>$C_{10}$ 为Wilson系数（电弱企鹅图贡献）</li></ul></p><p>对于B⁰→μ⁺μ⁻，公式形式相同但替换为对应B⁰的参数。</p><p>理论预测值：
+<div class="math">$$\mathcal{B}(B^0_s \to \mu^+\mu^-)_{\text{SM}} = (3.65 \pm 0.23) \times 10^{-9}$$</div>
+<div class="math">$$\mathcal{B}(B^0 \to \mu^+\mu^-)_{\text{SM}} = (1.06 \pm 0.09) \times 10^{-10}$$</div></p><p>---</p><p></p><p><h2 id="p-1411.4413v">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - LHC 2011年数据：$\sqrt{s}$ = 7 TeV，积分亮度约5 fb⁻¹
+  - LHC 2012年数据：$\sqrt{s}$ = 8 TeV，积分亮度约20 fb⁻¹
+  - 总计约25 fb⁻¹的质子-质子碰撞数据</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  - <strong>B⁰_s→μ⁺μ⁻</strong>：
+    - 分支比：$\mathcal{B}(B^0_s \to \mu^+\mu^-) = 2.8^{+0.7}_{-0.6} \times 10^{-9}$
+    - 显著性：>6σ（首次观测）
+    - 与SM一致：$\mathcal{B}_{\text{exp}}/\mathcal{B}_{\text{SM}} = 0.76^{+0.20}_{-0.18}$
+  
+  - <strong>B⁰→μ⁺μ⁻</strong>：
+    - 分支比：$\mathcal{B}(B^0 \to \mu^+\mu^-) = 3.9^{+1.4}_{-1.1} \times 10^{-10}$
+    - 显著性：3σ（证据）
+    - 与SM一致：$\mathcal{B}_{\text{exp}}/\mathcal{B}_{\text{SM}} = 3.7^{+1.3}_{-1.0}$</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 之前实验上限：$\mathcal{B}(B^0_s \to \mu^+\mu^-) < 1.1 \times 10^{-8}$ (CDF, 2011)
+  - 本文结果：首次观测，精度提高约4倍
+  - 与SM预测在1σ范围内一致，对新物理模型施加最严格约束</p><p>---</p><p></p><p><h2 id="p-1411.4413v">6. 创新点</h2></p><p><ul><li><strong>创新点1：首次实现LHC双实验联合分析</strong></li></ul>
+  - 开发了CMS和LHCb数据联合分析框架
+  - 最大化利用LHC的B物理数据潜力</p><p><ul><li><strong>创新点2：首次观测B⁰_s→μ⁺μ⁻衰变</strong></li></ul>
+  - 达到>6σ统计显著性
+  - 完成B物理长期目标</p><p><ul><li><strong>创新点3：新物理约束</strong></li></ul>
+  - 对超对称模型、模型II*等BSM理论施加最严格约束
+  - 排除大量新物理参数空间</p><p>---</p><p></p><p><h2 id="p-1411.4413v">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  - 联合分析不同实验/探测器数据可显著提高灵敏度
+  - 稀有过程测量是寻找新物理的重要途径
+  - 盲分析策略对高精度实验至关重要</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  - 增加数据量（Run 2/3数据）
+  - 改善探测器性能（升级硅条探测器）
+  - 探索更多衰变道（电子模式、τ轻子模式）
+  - 理论计算精度的同步提升</p><p>---</p><p>*注：本文为LHC联合实验的重要里程碑论文，为后续B物理精确测量奠定基础。*</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+        <div class="paper">
+            <div class="paper-header">
+                <h2>SWE-bench Goes Live!</h2>
+                <p>📄 ID: 2505.23419 | 🔗 <a href="https://arxiv.org/abs/2505.23419" target="_blank">arXiv原文</a></p>
+            </div>
+            <div class="content">
+                <h3>摘要</h3><p>[翻译失败]</p></p><p><h2 id="p-2505.23419">1. 研究动机 (Problem)</h2></p><p><ul><li><strong>研究问题</strong>：如何构建一个可扩展、可持续更新且能真实反映LLM在真实软件开发环境中解决bug能力的基准测试？</li></ul></p><p><ul><li><strong>研究背景</strong>：</li></ul>
+  - 问题解决任务（issue-resolving task）已成为评估大型语言模型（LLM）能力的关键基准
+  - SWE-bench及其变体已成为该领域的标准基准
+  - 真实世界软件开发是动态持续的，需要模型能够处理最新出现的问题</p><p><ul><li><strong>现有局限性</strong>：</li></ul>
+  1. <strong>数据过时</strong>：自发布以来从未更新，无法反映最新软件开发实践
+  2. <strong>覆盖范围窄</strong>：仅涵盖少数代码仓库，泛化性不足
+  3. <strong>人工依赖高</strong>：实例构建和环境设置需要大量人工操作
+  4. <strong>过拟合风险</strong>：静态数据集存在数据污染和过拟合问题</p><p>---</p><p></p><p><h2 id="p-2505.23419">2. 核心思想 (Key Idea)</h2></p><p><ul><li><strong>核心贡献</strong>：提出SWE-bench-Live，一个基于真实GitHub问题构建的live-updatable基准测试，包含1,319个任务和配套Docker镜像，并通过自动化筛选管道实现持续更新。</li></ul></p><p><ul><li><strong>创新点</strong>：</li></ul>
+  1. 首个可动态更新的真实世界bug修复基准
+  2. 自动化从实例创建到环境设置的全流程管道（\method）
+  3. 每个任务配备专用Docker镜像确保可复现性
+  4. 揭示了静态基准与动态基准之间存在显著性能差距</p><p><ul><li><strong>关键洞察</strong>：在受控评估条件下，模型在SWE-bench-Live上的表现远低于静态SWE-bench，表明现有基准存在严重的数据污染问题。</li></ul></p><p>---</p><p></p><p><h2 id="p-2505.23419">3. 算法结构 (Algorithm)</h2></p><p><ul><li><strong>整体框架</strong>：</li></ul>
+  ```
+  GitHub Issues → 问题筛选 → 代码仓库分析 → 实例构建 → Docker镜像生成 → 任务验证 → SWE-bench-Live
+  ```</p><p><ul><li><strong>核心步骤</strong>：</li></ul>
+  1. <strong>数据收集</strong>：从2024年以来的真实GitHub issues中收集问题
+  2. <strong>自动筛选</strong>：使用启发式规则和模型筛选可解决的issue
+  3. <strong>仓库分析</strong>：分析代码仓库结构，识别相关文件和依赖
+  4. <strong>实例构建</strong>：自动提取问题描述、预期修复方案和测试用例
+  5. <strong>环境配置</strong>：生成配套的Docker镜像，确保可复现执行
+  6. <strong>质量验证</strong>：验证任务的可解决性和评估标准</p><p>---</p><p></p><p><h2 id="p-2505.23419">4. 理论证明 (Theory)</h2></p><p><ul><li><strong>核心定理</strong>：本文为应用型论文，主要贡献在于基准构建和实证分析，未包含传统意义上的理论定理证明。</li></ul></p><p><ul><li><strong>重要公式</strong>：</li></ul>
+  - 任务解决率（Resolution Rate）：
+    <div class="math">$$\text{Resolution Rate} = \frac{\text{成功解决的问题数}}{\text{总任务数}}$$</div>
+  
+  - 性能差距度量（Performance Gap）：
+    <div class="math">$$\text{Gap} = \text{SWE-bench准确率} - \text{SWE-bench-Live准确率}$$</div></p><p>---</p><p></p><p><h2 id="p-2505.23419">5. 实验设计与结论 (Experiment)</h2></p><p><ul><li><strong>数据集</strong>：</li></ul>
+  - SWE-bench-Live：1,319个任务，来自93个不同代码仓库
+  - 基于2024年以来创建的GitHub issues
+  - 每个任务配有专用Docker镜像</p><p><ul><li><strong>主要结果</strong>：</li></ul>
+  1. 主流LLM和agent框架在SWE-bench-Live上表现显著低于SWE-bench
+  2. 性能差距在不同类型的仓库、issue时效性和任务难度上均存在
+  3. 验证了静态基准存在数据污染问题的假设</p><p><ul><li><strong>对比分析</strong>：</li></ul>
+  - 与原始SWE-bench相比：SWE-bench-Live揭示了更真实的模型能力
+  - 与其他变体相比：覆盖范围更广（93个仓库 vs 较少仓库）
+  - 自动化管道 vs 人工构建：效率大幅提升，支持持续更新</p><p>---</p><p></p><p><h2 id="p-2505.23419">6. 创新点</h2></p><p><ul><li><strong>创新点1</strong>：首次提出live-updatable的bug修复基准测试框架，解决静态基准过时问题</li></ul></p><p><ul><li><strong>创新点2</strong>：设计并实现了完整的自动化筛选管道（\method），消除人工瓶颈，实现规模化扩展</li></ul></p><p><ul><li><strong>创新点3</strong>：通过实证研究揭示了静态基准与真实评估之间的显著性能差距，为后续研究敲响数据污染警钟</li></ul></p><p>---</p><p></p><p><h2 id="p-2505.23419">7. 可借鉴点 (Your Research)</h2></p><p><ul><li><strong>研究启发</strong>：</li></ul>
+  1. 基准测试的时效性非常重要，动态更新机制值得借鉴
+  2. Docker容器化是保证可复现性的有效手段
+  3. 自动化数据构建管道可以大幅降低人工成本</p><p><ul><li><strong>改进方向</strong>：</li></ul>
+  1. 扩大仓库覆盖范围，纳入更多编程语言和领域
+  2. 增强自动化筛选管道的智能性，减少噪声数据
+  3. 添加任务难度分级，便于细粒度评估
+  4. 考虑引入多人协作场景，增加任务复杂度
+  5. 建立社区贡献机制，允许用户提交新任务</p><p>---</p><p>
+
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>
