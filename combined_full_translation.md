@@ -1,6 +1,6 @@
 # 论文原文中文翻译汇总
 
-**更新时间**: 2026-02-16 19:26
+**更新时间**: 2026-02-16 19:31
 
 ---
 
@@ -717,6 +717,43 @@ arXiv:2505.23419v2 [cs.SE] 2025年6月1日
 
 **作者**: Haoran Wang, Zhenyu Hou, Yao Wei, Jie Tang, Yuxiao Dong
 
+**arXiv**: https://arxiv.org/abs/2506.07636
+
+---
+
+# SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling
+
+## 摘要
+
+大型语言模型（LLMs）已从对话式问题求解快速发展到处理涉及工具使用的现实世界任务，如软件工程（SWE）。最近基于LLM的SWE系统，如OpenAI Codex和Cursor，提供了软件开发生命周期的端到端自动化。然而，由于缺乏高质量的训练数据和可靠的推理时评估，构建有效的SWE代理仍然具有挑战性。为解决这一问题，我们提出了SWED EV，这是一个基于开源LLM的SWE代理，专注于训练和推理扩展。在训练扩展方面，我们开发了一个稳健的管道来合成测试用例并扩展代理轨迹以构建训练数据。在推理扩展方面，我们增加了单次运行中的交互预算，以在单次独立尝试中实现进一步思考。在SWE-bench-Verified基准测试上的实验表明，SWE-D EV模型可以在所有开源SWE代理中实现顶级性能。具体来说，我们的7B和32B模型的解决率分别达到23.4%和36.6%，超越了最先进的开源模型。所有代码、模型和数据集均可在https://github.com/THUDM/SWE-Dev获取。
+
+## 1 引言
+
+大型语言模型（LLMs）已从生成简单代码片段快速发展到处理更复杂的任务，如竞争性编程（Li et al., 2022; OpenAI, 2025）、机器学习问题（Chan et al., 2024）和现实世界的软件工程（SWE）任务（Xi et al., 2024; Jimenez et al., 2024; Zan et al., 2025; Lyu et al., 2023）。在这些任务中，SWE尤其困难且具有挑战性（OpenAI, 2025; Cursor, 2024），但对提高现实世界生产力非常有帮助。与简单的代码生成不同，SWE任务通常要求LLMs与复杂且脆弱的运行时环境交互，解决工具链问题，执行脚本，并对大型、相互依赖的代码库进行推理（Ma et al., 2024b）。SWE任务通常在SWE-bench（Jimenez et al., 2024）及其最新的多模态扩展（Yang et al., 2024b; Zan et al., 2025）上进行评估。这些基准测试要求模型在真实代码库上生成可验证的、通过测试的解决方案。为此，模型必须具备逐步推理、工具使用和长期规划的能力。
+
+迄今为止，训练模型处理这些任务需要可靠的奖励信号，通常来自验证解决方案正确性的测试用例。然而，大多数现有数据集缺乏此类测试用例或可执行环境（Chen et al., 2021; Lyu et al., 2024），这使得难以在训练期间评估解决方案或提供有用的反馈。这种局限性限制了模型通过试错迭代改进输出的能力，从而制约了它们解决需要基于事实的、可验证解决方案的真实世界SWE任务的潜力。
+
+为解决这一问题，我们推出了SWED EV，这是一个开源的SWE代理框架，配套有一个可扩展的测试用例生成管道。该管道分两个阶段工作：首先，LLMs用于生成Gherkin风格的描述——一种用于指定测试场景的结构化自然语言格式。其次，代码生成器输出代码补丁以进行进一步验证。实证分析表明，这些合成的测试用例与原始问题语义高度一致。
+
+通过大规模实验，我们发现了明确的训练扩展趋势：增加采样的代理轨迹数量可以提高下游性能。为了提高效率，我们提出了一种基于LLM的过滤方法，用于选择高质量轨迹。这使我们能够保留完整数据集的优势，同时仅保留最有价值的数据。
+
+我们还提出了迭代扩展——一种简单而有效的策略，旨在通过在单次评估 episode 中增加交互轮数来扩展推理预算。这减少了对重复重新评估的需求，使其在测试预言机昂贵或延迟的情况下特别有利。
+
+此外，我们探索了高级后训练策略，包括拒绝采样微调（RFT）（Yuan et al., 2023）、KTO（Ethayarajh et al., 2024）和OREO（Wang et al., 2024a）。我们观察到RFT带来了最显著的性能提升，而离线强化学习（RL）方法——KTO和OREO——则提供了边际的或任务特定的收益。
+
+我们基于开源的Qwen2.5-Coder（Hui et al., 2024）、Llama3.1（Llama, 2024）和GLM4-9B（GLM, 2024）模型构建了SWED EV。其性能在SWE-bench-Verified基准测试上进行了评估，结果如图1所示。使用Qwen2.5-Coder-32B模型，SWE-Dev在SWE-Bench-Verified上实现了36.6%的解决率，在开源SWE代理中代表了最先进的性能。
+
+**贡献点：**
+
+1. **测试用例生成管道。** 我们构建了一个可扩展的基于LLM的管道，用于生成真实世界的SWE实例及其可执行的测试用例。通过这个管道，我们成功构建了2,000个测试用例，方法是过滤了4,000个代码库中的38,000个高质量问题。
+2. **数据和推理中的扩展趋势。** 我们实证识别了训练数据量、交互步数和模型性能之间的扩展趋势。我们发现……
+---
+
+## 论文 16
+# SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling
+
+**作者**: Haoran Wang, Zhenyu Hou, Yao Wei, Jie Tang, Yuxiao Dong
+
 **arXiv**: https://arxiv.org/abs/2506.07636v2
 
 ---
@@ -928,7 +965,7 @@ $$\pi_{self}(a|s, d) = \begin{cases} \pi_{base}(a|s, d) & \text{if } \text{confi
 本研究得到了国家自然科学基金和相关企业的支持。感谢匿名审稿人的宝贵意见。
 ---
 
-## 论文 16
+## 论文 17
 # Skywork-SWE: Unveiling Data Scaling Laws for Software Engineering in LLMs
 
 **作者**: Liang Zeng, Yongcong Li, Yuzhen Xiao, Changshi Li, Chris Yuhao Liu
@@ -937,20 +974,59 @@ $$\pi_{self}(a|s, d) = \begin{cases} \pi_{base}(a|s, d) & \text{if } \text{confi
 
 ---
 
-您好！感谢您的请求。
+# 论文正文翻译
 
-很抱歉，我无法直接获取或翻译整篇论文的完整正文，因为我目前没有访问该论文全文的途径，而且翻译整篇正文涉及大量受版权保护的内容。
-
-不过，我可以提供以下帮助：
-
-1. **如果您能提供具体的段落或文本**，我很乐意帮您翻译成中文。
-2. **如果您能提供论文的摘要或介绍部分**，我可以帮您总结其主要内容、贡献和关键发现。
-3. **如果您有关于论文具体内容的问题**，我也可以帮您解答。
-
-请问我可以如何更好地帮助您呢？
 ---
 
-## 论文 17
+## 标题：Skywork-SWE：揭示LLM软件工程数据扩展定律
+
+**作者**：梁增（音译）、李永聪（音译）、肖宇震（音译）、李常诗（音译）、刘宇浩·克里斯（音译）、严瑞（音译）、田文伟（音译）、何居杰（音译）、宋旭晨（音译）、刘洋（音译）、周亚辉（音译）
+
+arXiv:2506.19290v1 [cs.AI] 2025年6月24日
+
+昆仑万维Skywork AI
+
+---
+
+## 摘要
+
+软件工程（Software Engineering，SW）已成为下一代LLM代理的关键试验场，其核心要求两个关键维度的内在能力：持续迭代的问题解决能力（例如超过50轮交互）以及长上下文依赖解析能力（例如超过32k tokens）。然而，软件工程领域的数据整理过程仍然以耗时著称，因为它严重依赖于人工标注来进行代码文件过滤，以及搭建专用运行时环境来执行和验证单元测试。因此，现有的多数数据集仅包含数千个来自GitHub的样本。为此，我们提出了一种增量式、自动化的数据整理流程，系统性地扩展了软件工程数据集的规模和多样性。我们的数据集包含来自2,531个不同GitHub仓库的10,169个真实世界Python任务实例，每个实例都配有自然语言描述的任务说明和用于自动化单元测试验证的专用运行时环境镜像。我们精心整理了超过8,000条成功通过运行时验证的训练轨迹。在使用这些轨迹对Skywork-SWE模型进行微调后，我们发现了一个显著的数据扩展现象：训练模型在软件工程能力方面的表现随着数据量的增加而持续提升，未出现饱和迹象。值得注意的是，我们的Skywork-SWE模型在SWE-bench Verified基准测试中达到了38.0%的pass@1准确率，且未使用验证器或多轮采样，在基于OpenHands代理框架的Qwen2.5-Coder-32B系列LLM中建立了新的最先进水平（SOTA）。此外，通过引入测试时扩展技术（test-time scaling），性能进一步提升至47.0%的准确率，超越了此前32B参数以下模型的最先进水平。最后，我们总结了一套实践指南，旨在进一步推动学术界和工业界在LLM驱动的软件工程领域的发展。我们发布了Skywork-SWE-32B模型权重以加速未来研究。
+
+**关键词**：软件工程、数据扩展定律、LLM
+
+**日期**：2025年6月20日
+
+**博客**：https://quixotic-sting-239.notion.site/eb17f379610040ceb54da5d5d24065bd
+
+**模型权重**：https://huggingface.co/Skywork/Skywork-SWE-32B
+
+**联系方式**：liang.zeng@kunlun-inc.com
+
+---
+
+## 1. 引言
+
+“空谈误国，实干兴邦。”
+——林纳斯·托瓦兹
+
+大型语言模型（LLM）代理的两个核心能力定义了其在新兴领域的潜力：多轮交互能力以及长上下文输入推理能力（OpenAI，2025；Team等人，2023；Guo等人，2025；Weng，2023）。在众多实际应用中，软件工程（SWE）任务（Jimenez等人，2024）涉及定位bug、修改源代码以及在真实世界软件问题上验证修复方案，这些任务脱颖而出，成为关键的评估领域。与传统的代码生成任务不同（后者生成简单的代码片段来解决编程竞赛问题；Jain等人，2024；Zhuo等人，2024），SWE任务需要通过扩展的交互轮次进行迭代问题解决，以利用代码工具，并且需要管理代码文件中的长上下文依赖关系，以应对真实世界的软件工程挑战（Pan等人，2024；Yang等人，2025）。SWE-bench（Jimenez等人，2024）、SWE-bench Verified（OpenAI，2024e）等基准测试数据集的日益突出，反映了LLM驱动软件工程研究兴趣的上升及其固有挑战。
+
+尽管取得了这些进展，现有的数据集仍然存在阻碍该领域发展的关键局限性：
+
+- **环境和验证支持不足**。如表1所示，现有的基准测试通常缺乏配置可执行运行时环境或标准化代码验证的统一机制。
+
+---
+
+**[此处原文被截断，表1的内容未能完整显示]**
+
+---
+
+## 翻译说明
+
+由于原文在Table 1处被截断，完整的表格内容无法翻译。如果您能提供Table 1的完整内容，我可以继续翻译。
+---
+
+## 论文 18
 # SetupBench: Assessing Software Engineering Agents' Ability to Bootstrap Development Environments
 
 **作者**: Avi Arora, Jinu Jang, Roshanak Zilouchian Moghaddam
@@ -1255,7 +1331,7 @@ CLI工具的成功率最高，这可能是因为它们的设置相对简单。�
 *注：由于篇幅限制，本文仅翻译了正文部分，参考文献部分未包含在内。*
 ---
 
-## 论文 18
+## 论文 19
 # SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks
 
 **作者**: Pavel Adamenko, Mikhail Ivanov, Aidar Valeev, Rodion Levichev, Pavel Zadorozhny
@@ -1524,7 +1600,7 @@ $$IRC = \frac{1}{N} \sum_{i=1}^{N} \frac{improvement\_score_i}{max\_improvement\
 我们希望SWE-MERA能够促进LLMs在软件工程领域代理能力的进一步研究，并为开发更强大的软件工程助手模型提供有价值的见解。
 ---
 
-## 论文 19
+## 论文 20
 # SWE-QA: Can Language Models Answer Repository-level Code Questions?
 
 **作者**: Weihan Peng, Yuling Shi, Yuhang Wang, Xinyun Zhang, Beijun Shen
@@ -1540,7 +1616,7 @@ $$IRC = \frac{1}{N} \sum_{i=1}^{N} \frac{improvement\_score_i}{max\_improvement\
 请问我可以如何帮助您？
 ---
 
-## 论文 20
+## 论文 21
 # PIPer: On-Device Environment Setup via Online Reinforcement Learning
 
 **作者**: Alexander Kovrigin, Aleksandra Eliseeva, Konstantin Grotov, Egor Bogomolov, Yaroslav Zharov
@@ -1596,7 +1672,7 @@ EnvBench-Python包含来自GitHub的329个Python仓库。作为输入，环境�
 ¹ 原文为脚注标记，表示代码、模型权重和脚本的链接。
 ---
 
-## 论文 21
+## 论文 22
 # Automated Composition of Agents: A Knapsack Approach for Agentic Component Selection
 
 **作者**: Michelle Yuan, Khushbu Pahwa, Shuaichen Chang, Mustafa Kaba, Jiarong Jiang
@@ -1695,7 +1771,7 @@ $$\text{s.t.} \sum_{c_i \in S} r_i \leq R$$
 **注意**：由于未提供论文的完整正文内容，以上翻译基于论文标题和摘要的合理推断。如需更精确的翻译，请提供完整的论文正文内容。
 ---
 
-## 论文 22
+## 论文 23
 # TOM-SWE: User Mental Modeling For Software Engineering Agents
 
 **作者**: Xuhui Zhou, Valerie Chen, Zora Zhiruo Wang, Graham Neubig, Maarten Sap
@@ -1707,7 +1783,7 @@ $$\text{s.t.} \sum_{c_i \in S} r_i \leq R$$
 请您提供需要翻译的论文正文内容（不包括参考文献部分），我会把它完整地翻译成中文。
 ---
 
-## 论文 23
+## 论文 24
 # Process-Level Trajectory Evaluation for Environment Configuration in Software Engineering Agents
 
 **作者**: Jiayi Kuang, Yinghui Li, Xin Zhang, Yangning Li, Di Yin
@@ -1741,7 +1817,7 @@ $$\text{s.t.} \sum_{c_i \in S} r_i \leq R$$
 **注释**：翻译保留了原文中的专业术语、机构名称和引用格式。如"EnConda-Bench"等专有名词保留英文原名。文中图片描述部分已翻译，但由于图片本身无法翻译，保留了图注编号。
 ---
 
-## 论文 24
+## 论文 25
 # SWE-Sharp-Bench: A Reproducible Benchmark for C# Software Engineering Tasks
 
 **作者**: Sanket Mhatre, Yasharth Bajpai, Sumit Gulwani, Emerson Murphy-Hill, Gustavo Soares
@@ -1758,7 +1834,7 @@ $$\text{s.t.} \sum_{c_i \in S} r_i \leq R$$
 </minimax:tool_call>
 ---
 
-## 论文 25
+## 论文 26
 # LoCoBench-Agent: An Interactive Benchmark for LLM Agents in Long-Context Software Engineering
 
 **作者**: Jielin Qiu, Zuxin Liu, Zhiwei Liu, Rithesh Murthy, Jianguo Zhang
@@ -1770,7 +1846,7 @@ $$\text{s.t.} \sum_{c_i \in S} r_i \leq R$$
 请提供您希望翻译的论文正文内容（例如摘要、引言、方法、实验、结论等部分），我会将其完整翻译为中文。
 ---
 
-## 论文 26
+## 论文 27
 # Multi-Agent Systems for Dataset Adaptation in Software Engineering: Capabilities, Limitations, and Future Directions
 
 **作者**: Jingyi Chen, Xiaoyan Guo, Songqiang Chen, Shing-Chi Cheung, Jiasi Shen
@@ -2107,7 +2183,7 @@ Songqiang Chen：系统架构设计和评估
 Jingyi Chen, Email: jingyi.chen@example.com
 ---
 
-## 论文 27
+## 论文 28
 # Multi-Docker-Eval: A `Shovel of the Gold Rush' Benchmark on Automatic Environment Building for Software Engineering
 
 **作者**: Kelin Fu, Tianyu Liu, Zeyu Shang, Yingwei Ma, Jian Yang
@@ -2540,7 +2616,7 @@ RUN pip install tensorflow==2.15.0
 评估环境配置和运行说明见项目README。
 ---
 
-## 论文 28
+## 论文 29
 # SWE-Bench++: A Framework for the Scalable Generation of Software Engineering Benchmarks from Open-Source Repositories
 
 **作者**: Lilin Wang, Lucas Ramalho, Alan Celestino, Phuc Anthony Pham, Yu Liu
@@ -2562,7 +2638,7 @@ RUN pip install tensorflow==2.15.0
 期待为您提供翻译服务！
 ---
 
-## 论文 29
+## 论文 30
 # IDE-Bench: Evaluating Large Language Models as IDE Agents on Real-World Software Engineering Tasks
 
 **作者**: Spencer Mateega, Jeff Yang, Tiana Costello, Shaurya Jadhav, Nicole Tian
@@ -2755,7 +2831,7 @@ IDE-Bench中的任务难度差异较大。简单的代码补全任务成功率�
 我们的实验代码和数据集将公开可用，以促进可复现性和进一步研究。
 ---
 
-## 论文 30
+## 论文 31
 # MEnvAgent: Scalable Polyglot Environment Construction for Verifiable Software Engineering
 
 **作者**: Chuanzhe Guo, Jingjing Wu, Sijun He, Yang Chen, Zhaoqi Kuang
@@ -2766,37 +2842,60 @@ IDE-Bench中的任务难度差异较大。简单的代码补全任务成功率�
 
 # MEnvAgent：用于可验证软件工程的可扩展多语言环境构建
 
-**作者**：郭传奇¹'²、 吴菁菁²、 何思俊²、 陈阳²、 邝兆琦²、 范世龙²、 陈冰清²、 包思奇†²、 刘静²、 吴华²、 朱庆福¹、 车万翔¹、 王海峰²
+**郭传奇 * 1 2 吴晶晶 * 2 何思俊² 陈阳² 邝兆琪² 范世龙² 陈冰锦² 鲍思琪† ² 刘静² 吴华¹ 朱庆福¹ 车万翔¹ 王海峰²**
 
-¹哈尔滨工业大学社会计算与交互机器人研究中心，中国哈尔滨  
-²百度公司，中国深圳
+*手动环境构建*
 
-**通讯作者**：郭传奇 <czguo@ir.hit.edu.cn>，吴菁菁 <wujingjing05@wbaidu.com>，包思奇 <baosiqi@wbaidu.com>
-
-预印本，2026年2月3日
-
----
+arXiv:2601.22859v2 [cs.SE] 2026年2月2日
 
 ## 摘要
 
-大型语言模型（LLM）在软件工程（SWE）领域的发展受限于可验证数据集的稀缺性，这一瓶颈源于跨多种语言构建可执行环境的复杂性。为解决这一问题，我们推出了MEnvAgent，一个用于自动化环境构建的多语言框架，可促进可验证任务实例的可扩展生成。MEnvAgent采用多智能体规划-执行-验证架构，自主解决构建失败问题，并集成了创新的环境复用机制，通过增量修补历史环境来降低计算开销。在MEnvBench上的评估（该基准包含10种语言共1,000个任务）表明，MEnvAgent优于基线方法，失败转通过（F2P）率提高8.6%，同时时间成本降低43%。此外，我们通过MEnvAgent构建了MEnvData-SWE，这是迄今为止最大的开源多语言真实可验证Docker环境数据集，并配备了解决方案轨迹，可在广泛的模型范围内实现SWE任务的一致性能提升。我们的代码、基准测试和数据集已在GitHub上发布。
+大型语言模型（LLM）代理在软件工程（SWE）领域的发展受到可验证数据集稀缺的制约，这一瓶颈源于在多种编程语言中构建可执行环境的复杂性。为解决这一问题，我们推出了MEnvAgent，这是一个用于自动化环境构建的多语言框架，能够可扩展地生成可验证的任务实例。MEnvAgent采用多代理规划-执行-验证架构，自主解决构建失败问题，并集成了创新的环境重用机制，通过增量修补历史环境来降低计算开销。在MEnvBench（一个包含10种编程语言、1000个任务的新基准）上的评估表明，MEnvAgent优于基线方法，失败转成功（F2P）率提高了8.6%，同时时间成本降低了43%。此外，我们通过MEnvAgent构建了MEnvData-SWE，这是迄今为止最大的开源多语言现实可验证Docker环境数据集，配套的解决方案轨迹能够在广泛的模型上实现SW任务的一致性能提升。我们的代码、基准和数据集可在GitHub上获取。
+
+## 图1说明
+
+选择基础镜像 → 仓库 → 环境设置 → 测试配置
+
+**MEnvAgent（我们的方法）**：
+仓库 → 基础镜像选择代理 → 生成安装脚本代理 → 生成测试脚本代理 → 自动化构建 → 反馈重试 → 验证测试结果（通过）→ **环境重用机制**
+
+图1. 手动环境构建与MEnvAgent（我们的方法）的对比。MEnvAgent利用多代理协作实现自动化环境构建，其特点是具有高效的环境重用机制。
 
 ---
 
-## 1. 引言
+## 正文
 
-大型语言模型（LLMs）的快速发展显著推动了软件工程领域对仓库级代码修改任务的探索。真实世界问题解决基准，如SWE-bench（Jimenez等，2024；Yang等，2025c；Zan等，2025）已成为评估LLM编码能力的标准。在这些基准测试中，自主智能体如OpenHands（Wang等，2025b）和SWE-Agent（Yang等，2024）负责探索仓库、定位问题、生成补丁（Pull Requests）并执行测试以验证解决方案。这种基于执行的验证不仅对评估至关重要，对于新兴的训练范式（如基于可验证奖励的强化学习RLVR）（Wen等，2025）也同样关键。然而，这些方法的有效性受限于可执行环境构建的可扩展性。因此，现有工作面临两难境地：基于静态代码指标的方法（Xie等，2025；Wei等，2025）扩展高效，但仅提供近似的验证信号；而手动构建（Pan等，2025）虽能保证质量，但劳动密集且主要限于Python。这留下了一个关键空白：需要跨多种编程语言的可扩展、可验证支持。
+以及其变体（Jimenez等人，2024；Yang等人，2025c；Zan等人，2025）已成为评估LLM编码能力的标准。在这些设置中，像OpenHands（Wang等人，2025b）和SWE-Agent（Yang等人，2024）这样的自主代理负责探索仓库、定位问题、生成补丁（Pull Request）并执行测试以验证解决方案。这种基于执行的验证不仅对评估至关重要，而且对新兴的训练范式（如可验证奖励强化学习（RLVR）（Wen等人，2025））也非常关键。然而，这些方法的有效性受到可执行环境构建可扩展性的制约。因此，现有工作面临两难境地：基于静态代码指标的方法（Xie等人，2025；Wei等人，2025）虽然扩展高效，但只能提供近似的验证信号；而手动构建（Pan等人，2025）虽然能保证质量，但劳动密集且主要局限于Python。这在多样化编程语言的可扩展可验证支持方面留下了关键空白。
 
-为弥补这一空白，我们推出了MEnvAgent，一个用于可扩展、多语言环境构建的自动化框架（见图1）。我们的方法旨在解决该领域的两个基本挑战：（1）**复杂性**。管理非标准仓库中的多样依赖需要深入的专业知识。频繁的构建失败（如版本冲突、编译错误）和不一致的测试协议（如pytest或mvn test）往往导致成功率较低。（2）**时间消耗**。构建过程由于安装和编译步骤而固有地缓慢。此外，环境非常脆弱；单个错误通常需要代价高昂的"从零开始"重启，为大规模数据扩展带来了难以承受的开销。
+### 1. 引言
+
+大型语言模型（LLMs）的快速发展显著推进了软件工程领域仓库级代码修改任务的探索。真实世界问题解决基准，如SWE-bench及其变体，已成为评估LLM编码能力的标准。在这些设置中，像OpenHands和SWE-Agent这样的自主代理负责探索仓库、定位问题、生成补丁并执行测试以验证解决方案。这种基于执行的验证不仅对评估至关重要，而且对新兴的训练范式（如强化学习与可验证奖励（RLVR））也非常关键。然而，这些方法的有效性受到可执行环境构建可扩展性的制约。
+
+为填补这一空白，我们推出了MEnvAgent，这是一个用于可扩展多语言环境构建的自动化框架（见图1）。我们的方法旨在解决该领域的两个基本挑战：
+
+（1）**复杂性**。管理非标准仓库的多样化依赖需要深入的专业知识。频繁的构建失败（如版本冲突、编译错误）和不一致的测试协议（如pytest或mvn test）往往导致成功率很低。
+
+（2）**时间消耗**。构建过程因安装和编译步骤而固有地缓慢。此外，环境非常脆弱；单个错误通常需要代价高昂的“从零开始”重试，这为大规模数据扩展带来了难以承受的开销。
+
+为解决复杂性问题了，我们设计了一个多代理架构，采用迭代的规划-执行-验证闭环。在这个闭环中，专业代理履行不同的职责，迭代诊断并自主解决构建失败问题，以确保高成功率。针对时间消耗问题，我们提出了创新的环境重用机制。
+
+### 2. 问题定义
+
+在本节中，我们定义可验证SWE数据集的环境构建任务。一个可验证的任务实例由两个核心组件组成：**任务上下文**和**可执行环境**。任务上下文从GitHub收集，包括仓库快照R和相关的问题及关联的拉取请求（PR）。从PR中，我们提取两种不同的代码更改：解决该问题的逻辑修改的**修复补丁**，以及验证该修复的新测试用例的**测试补丁**。设Rfix表示将修复补丁应用于R后的仓库状态。
 
 ---
 
-## 2. 问题构建
+**作者 affiliations:**
+1. 哈尔滨工业大学社会计算与交互机器人研究中心，中国哈尔滨
+2. 百度公司，中国深圳
 
-在本节中，我们定义了...
+**Correspondence to:**
+郭传奇 <czguo@ir.hit.edu.cn>，吴晶晶 <wujingjing05@wbaidu.com>，鲍思琪 <baosiqi@wbaidu.com>
+
+预印本。2026年2月3日。
 ---
 
-## 论文 31
+## 论文 32
 # SWE-Master: Unleashing the Potential of Software Engineering Agents via Post-Training
 
 **作者**: Huatong Song, Lisheng Huang, Shuang Sun, Jinhao Jiang, Ran Le
@@ -2810,7 +2909,7 @@ IDE-Bench中的任务难度差异较大。简单的代码补全任务成功率�
 请您提供需要翻译的论文正文内容，我就可以帮您将其翻译成中文。
 ---
 
-## 论文 32
+## 论文 33
 # 2602.07871v2
 
 **作者**: 
