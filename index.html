@@ -2,30 +2,212 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>论文检索与精读</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; background: #f0f4f8; }
-        h1 { text-align: center; color: #2d3748; }
-        .cards { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); }
-        .card a { display: inline-block; padding: 15px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-size: 18px; }
-        .card p { color: #718096; margin-top: 10px; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #e4e4e7;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 {
+            color: #fff;
+            font-size: 2.5em;
+            margin: 0 0 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p { color: #a0a0b0; margin: 5px 0; }
+        
+        .filters {
+            background: rgba(255,255,255,0.08);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .filters label { color: #b0b0c0; font-weight: 500; }
+        .filters select, .filters input {
+            background: #2a2a4a;
+            border: 1px solid #4a4a6a;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .filters button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .filters button:hover { opacity: 0.9; }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.12);
+            border-color: #667eea;
+        }
+        .card h3 {
+            color: #fff;
+            margin: 0 0 10px;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        .card .meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .card .tag {
+            background: rgba(102, 126, 234, 0.3);
+            color: #a0a8ff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+        .card .tag.high { background: rgba(34, 197, 94, 0.3); color: #4ade80; }
+        .card .tag.medium { background: rgba(234, 179, 8, 0.3); color: #facc15; }
+        
+        .card a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+        }
+        .card a:hover { opacity: 0.9; }
+        
+        .stats {
+            text-align: center;
+            color: #888;
+            margin-top: 30px;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>📚 论文检索与精读</h1>
-    <div class="cards">
-        <div class="card">
-            <h2>🔍 检索结果</h2>
-            <a href="search_results.html">查看</a>
-            <p>83篇论文，32篇高度相关</p>
+    <div class="container">
+        <div class="header">
+            <h1>📚 论文检索与精读</h1>
+            <p>EnvBench / Automated Environment Setup 相关论文</p>
         </div>
-        <div class="card">
-            <h2>📖 精读报告</h2>
-            <a href="deep_reading.html">查看</a>
-            <p>32篇深度分析</p>
+        
+        <div class="filters">
+            <label>🔍 搜索:</label>
+            <input type="text" id="searchInput" placeholder="搜索论文标题..." onkeyup="filterPapers()">
+            
+            <label>📅 年份:</label>
+            <select id="yearFilter" onchange="filterPapers()">
+                <option value="all">全部</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+            </select>
+            
+            <label>📊 相似度:</label>
+            <select id="simFilter" onchange="filterPapers()">
+                <option value="all">全部</option>
+                <option value="100">100%</option>
+                <option value="90">90%+</option>
+                <option value="80">80%+</option>
+                <option value="60">60%+</option>
+            </select>
+            
+            <label>🔄 排序:</label>
+            <select id="sortBy" onchange="filterPapers()">
+                <option value="sim">按相似度</option>
+                <option value="year">按年份</option>
+                <option value="title">按标题</option>
+            </select>
+            
+            <button onclick="filterPapers()">应用筛选</button>
         </div>
+        
+        <div class="cards" id="cardsContainer">
+            <!-- Cards will be inserted here -->
+        </div>
+        
+        <div class="stats" id="stats"></div>
     </div>
+    
+    <script>
+        const papers = [{"title": "1. EnvBench: A Benchmark for Automated Environment...", "full_title": "1. EnvBench: A Benchmark for Automated Environment Setup", "similarity": 100.0, "year": 2025}, {"title": "2. Multi-Docker-Eval: A "Shovel of the Gold Rush" ...", "full_title": "2. Multi-Docker-Eval: A "Shovel of the Gold Rush" Benchmark on Automatic Environment Building for Software Engineering", "similarity": 100.0, "year": 2025}, {"title": "3. SetupBench: Assessing Software Engineering Agen...", "full_title": "3. SetupBench: Assessing Software Engineering Agents" Ability to Bootstrap Development Environments", "similarity": 100.0, "year": 2025}, {"title": "4. Process-Level Trajectory Evaluation for Environ...", "full_title": "4. Process-Level Trajectory Evaluation for Environment Configuration in Software Engineering Agents", "similarity": 100.0, "year": 2025}, {"title": "5. MEnvAgent: Scalable Polyglot Environment Constr...", "full_title": "5. MEnvAgent: Scalable Polyglot Environment Construction for Verifiable Software Engineering", "similarity": 98.0, "year": 2026}, {"title": "6. CVE-Bench: Benchmarking LLM-based Software Engi...", "full_title": "6. CVE-Bench: Benchmarking LLM-based Software Engineering Agent"s Ability to Repair Real-World CVE Vulnerabilities", "similarity": 97.0, "year": 2025}, {"title": "7. HerAgent: Rethinking the Automated Environment ...", "full_title": "7. HerAgent: Rethinking the Automated Environment Deployment via Hierarchical Test Pyramid", "similarity": 86.0, "year": 2026}, {"title": "8. GitTaskBench: A Benchmark for Code Agents Solvi...", "full_title": "8. GitTaskBench: A Benchmark for Code Agents Solving Real-World Tasks Through Code Repository Leveraging", "similarity": 86.0, "year": 2025}, {"title": "9. Spider2-V: How Far Are Multimodal Agents From A...", "full_title": "9. Spider2-V: How Far Are Multimodal Agents From Automating Data Science and Engineering Workflows?", "similarity": 84.0, "year": 2024}, {"title": "10. IDE-Bench: Evaluating Large Language Models as...", "full_title": "10. IDE-Bench: Evaluating Large Language Models as IDE Agents on Real-World Software Engineering Tasks", "similarity": 83.0, "year": 2026}, {"title": "11. LoCoBench-Agent: An Interactive Benchmark for ...", "full_title": "11. LoCoBench-Agent: An Interactive Benchmark for LLM Agents in Long-Context Software Engineering", "similarity": 81.0, "year": 2025}, {"title": "12. SWE-Dev: Building Software Engineering Agents ...", "full_title": "12. SWE-Dev: Building Software Engineering Agents with Training and Inference Scaling", "similarity": 81.0, "year": 2025}, {"title": "13. SWE-Bench++: A Framework for the Scalable Gene...", "full_title": "13. SWE-Bench++: A Framework for the Scalable Generation of Software Engineering Benchmarks from Open-Source Repositories", "similarity": 78.0, "year": 2025}, {"title": "14. Multi-Agent Systems for Dataset Adaptation in ...", "full_title": "14. Multi-Agent Systems for Dataset Adaptation in Software Engineering: Capabilities, Limitations, and Future Directions", "similarity": 78.0, "year": 2025}, {"title": "15. SWE-MERA: A Dynamic Benchmark for Agenticly Ev...", "full_title": "15. SWE-MERA: A Dynamic Benchmark for Agenticly Evaluating Large Language Models on Software Engineering Tasks", "similarity": 77.0, "year": 2025}, {"title": "16. Hadoop-Benchmark: Rapid Prototyping and Evalua...", "full_title": "16. Hadoop-Benchmark: Rapid Prototyping and Evaluation of Self-Adaptive Behaviors in Hadoop Clusters", "similarity": 75.0, "year": 2017}, {"title": "17. Automated Benchmark Generation for Repository-...", "full_title": "17. Automated Benchmark Generation for Repository-Level Coding Tasks", "similarity": 73.0, "year": 2025}, {"title": "18. Saving SWE-Bench: A Benchmark Mutation Approac...", "full_title": "18. Saving SWE-Bench: A Benchmark Mutation Approach for Realistic Agent Evaluation", "similarity": 72.0, "year": 2025}, {"title": "19. PIPer: On-Device Environment Setup via Online ...", "full_title": "19. PIPer: On-Device Environment Setup via Online Reinforcement Learning", "similarity": 70.0, "year": 2025}, {"title": "20. Skywork-SWE: Unveiling Data Scaling Laws for S...", "full_title": "20. Skywork-SWE: Unveiling Data Scaling Laws for Software Engineering in LLMs", "similarity": 70.0, "year": 2025}, {"title": "21. Benchmarking Large Language Models for Root Ca...", "full_title": "21. Benchmarking Large Language Models for Root Cause Analysis in Train Control Software Testing", "similarity": 70.0, "year": 2025}, {"title": "22. SWE-smith: Scaling Data for Software Engineeri...", "full_title": "22. SWE-smith: Scaling Data for Software Engineering Agents", "similarity": 69.0, "year": 2025}, {"title": "23. SWE-bench-java: A GitHub Issue Resolving Bench...", "full_title": "23. SWE-bench-java: A GitHub Issue Resolving Benchmark for Java", "similarity": 68.0, "year": 2024}, {"title": "24. SWE-Master: Unleashing the Potential of Softwa...", "full_title": "24. SWE-Master: Unleashing the Potential of Software Engineering Agents via Post-Training", "similarity": 67.0, "year": 2026}, {"title": "25. TOM-SWE: User Mental Modeling For Software Eng...", "full_title": "25. TOM-SWE: User Mental Modeling For Software Engineering Agents", "similarity": 65.0, "year": 2025}, {"title": "26. SWE-Sharp-Bench: A Reproducible Benchmark for ...", "full_title": "26. SWE-Sharp-Bench: A Reproducible Benchmark for C# Software Engineering Tasks", "similarity": 64.0, "year": 2025}, {"title": "27. SyncMind: Measuring Agent Out-of-Sync Recovery...", "full_title": "27. SyncMind: Measuring Agent Out-of-Sync Recovery in Collaborative Software Engineering", "similarity": 63.0, "year": 2025}, {"title": "28. The Atlas Benchmark: an Automated Evaluation F...", "full_title": "28. The Atlas Benchmark: an Automated Evaluation Framework for Human Motion Prediction", "similarity": 61.0, "year": 2022}, {"title": "29. Automated Composition of Agents: A Knapsack Ap...", "full_title": "29. Automated Composition of Agents: A Knapsack Approach for Agentic Component Selection", "similarity": 61.0, "year": 2025}, {"title": "30. SWE-QA: Can Language Models Answer Repository-...", "full_title": "30. SWE-QA: Can Language Models Answer Repository-level Code Questions?", "similarity": 61.0, "year": 2025}, {"title": "31. CIPerf: a benchmark for continuous integration...", "full_title": "31. CIPerf: a benchmark for continuous integration services performance and cost analysis", "similarity": 60.0, "year": 2024}, {"title": "32. SWE-bench Goes Live!", "full_title": "32. SWE-bench Goes Live!", "similarity": 60.0, "year": 2025}];
+        
+        function filterPapers() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const year = document.getElementById('yearFilter').value;
+            const sim = document.getElementById('simFilter').value;
+            const sort = document.getElementById('sortBy').value;
+            
+            let filtered = papers.filter(p => {
+                const matchSearch = p.title.toLowerCase().includes(search) || p.full_title.toLowerCase().includes(search);
+                const matchYear = year === 'all' || p.year.toString() === year;
+                const matchSim = sim === 'all' || p.similarity >= parseInt(sim);
+                return matchSearch && matchYear && matchSim;
+            });
+            
+            // Sort
+            filtered.sort((a, b) => {
+                if (sort === 'sim') return b.similarity - a.similarity;
+                if (sort === 'year') return b.year - a.year;
+                return a.title.localeCompare(b.title);
+            });
+            
+            // Render
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = filtered.map((p, i) => `
+                <div class="card">
+                    <h3>${p.full_title}</h3>
+                    <div class="meta">
+                        <span class="tag">📅 ${p.year}</span>
+                        <span class="tag ${p.similarity >= 80 ? 'high' : p.similarity >= 60 ? 'medium' : ''}">📊 ${p.similarity}%</span>
+                    </div>
+                    <a href="deep_reading.html#paper-${i+1}">查看精读报告</a>
+                </div>
+            `).join('');
+            
+            document.getElementById('stats').textContent = `显示 ${filtered.length} / ${papers.length} 篇论文`;
+        }
+        
+        // Initial render
+        filterPapers();
+    </script>
 </body>
 </html>
